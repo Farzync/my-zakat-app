@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum untuk ZakatType
+enum ZakatType {
+  FITRAH
+  MAL
+  INFAK
+  OTHER
+}
+
+// Enum untuk OnBehalfOfType
+enum OnBehalfOfType {
+  SELF
+  FAMILY
+  BADAL
+  OTHER
+}
+
+// Enum untuk UserRole
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+// Model User
+model User {
+  id            String        @id @default(cuid())
+  username      String        @unique
+  password      String
+  name          String
+  role          UserRole
+  transactions  Transaction[]
+}
+
+// Model Transaction
+model Transaction {
+  id                String           @id @default(cuid())
+  donorName         String
+  recipientName     String
+  onBehalfOf        OnBehalfOf[]     // Sekarang array dari model OnBehalfOf
+  amount            Float
+  date              DateTime
+  paymentMethod     String
+  zakatType         ZakatType
+  notes             String?
+  donorSignature    String?
+  recipientSignature String?
+  userId            String
+  user              User             @relation(fields: [userId], references: [id])
+}
+
+// Model untuk OnBehalfOf
+model OnBehalfOf {
+  id            String           @id @default(cuid())
+  transactionId String
+  transaction   Transaction       @relation(fields: [transactionId], references: [id])
+  type           OnBehalfOfType
+  name           String
+}
