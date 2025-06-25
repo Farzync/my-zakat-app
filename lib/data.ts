@@ -62,6 +62,24 @@ export async function getAllTransactions(): Promise<Transaction[]> {
   return transactionsData as Transaction[]
 }
 
+export async function getPaginatedTransactions(page = 1, limit = 10): Promise<{
+  transactions: Transaction[];
+  totalPages: number;
+  totalItems: number;
+}> {
+  const transactions = await getAllTransactions();
+  const totalItems = transactions.length;
+
+  const totalPages = Math.ceil(totalItems / limit);
+  const offset = (page - 1) * limit;
+
+  return {
+    transactions: transactions.slice(offset, offset + limit),
+    totalPages,
+    totalItems,
+  };
+}
+
 export async function getTransactionById(id: string): Promise<Transaction | null> {
   const transactions = await getAllTransactions()
   return transactions.find((t) => t.id === id) || null
