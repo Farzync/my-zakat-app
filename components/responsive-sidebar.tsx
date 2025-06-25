@@ -6,7 +6,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { logout } from "@/lib/actions"
 import { LayoutDashboard, Plus, List, BarChart3, FileText, Users, Menu, LogOut, User } from "lucide-react"
@@ -84,6 +84,9 @@ export function ResponsiveSidebar({ children, user }: ResponsiveSidebarProps) {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
+          <SheetHeader>
+            <SheetTitle className="sr-only">Menu Navigasi</SheetTitle>
+          </SheetHeader>
           <SidebarContent userRole={user.role} onItemClick={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
@@ -107,8 +110,8 @@ export function ResponsiveSidebar({ children, user }: ResponsiveSidebarProps) {
 
               <form action={logout}>
                 <Button variant="outline" size="sm" type="submit">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Logout</span>
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Logout</span>
                 </Button>
               </form>
             </div>
