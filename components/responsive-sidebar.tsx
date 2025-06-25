@@ -31,7 +31,7 @@ const adminNavigation = [{ name: "Kelola User", href: "/dashboard/users", icon: 
 
 function SidebarContent({ userRole, onItemClick }: { userRole: string; onItemClick?: () => void }) {
   const pathname = usePathname()
-  const allNavigation = userRole === "admin" ? [...navigation, ...adminNavigation] : navigation
+  const allNavigation = userRole === "ADMIN" ? [...navigation, ...adminNavigation] : navigation
 
   return (
     <div className="flex flex-col h-full">

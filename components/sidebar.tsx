@@ -22,7 +22,7 @@ const adminNavigation = [{ name: "Kelola User", href: "/dashboard/users", icon: 
 export function Sidebar({ userRole }: SidebarProps) {
   const pathname = usePathname()
 
-  const allNavigation = userRole === "admin" ? [...navigation, ...adminNavigation] : navigation
+  const allNavigation = userRole === "ADMIN" ? [...navigation, ...adminNavigation] : navigation
 
   return (
     <div className="bg-white w-64 shadow-lg">
