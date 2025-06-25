@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
-import { getUserByCredentials } from "@/lib/data"
+import { getUserByCredentials } from "@/lib/user"
 
 const secretKey = process.env.JWT_SECRET || "your-secret-key"
 const key = new TextEncoder().encode(secretKey)

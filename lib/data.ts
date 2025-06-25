@@ -1,5 +1,4 @@
 import transactionsData from "@/data/transactions.json"
-import usersData from "@/data/users.json"
 
 export interface Transaction {
   id: string
@@ -235,12 +234,6 @@ export async function getFilteredReportData(
     if (end && itemDate > end) return false
     return true
   })
-}
-
-// User functions
-export async function getUserByCredentials(username: string, password: string): Promise<User | null> {
-  const users = usersData as User[]
-  return users.find((u) => u.username === username && u.password === password) || null
 }
 
 // Chart data functions
