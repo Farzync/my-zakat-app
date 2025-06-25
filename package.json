@@ -1,7 +1,6 @@
 {
-  "name": "my-v0-project",
-  "version": "0.1.0",
-  "private": true,
+  "name": "my-zakat-app",
+  "version": "0.1.1",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
