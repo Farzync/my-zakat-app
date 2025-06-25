@@ -1,0 +1,98 @@
+{
+  "monthly": [
+    {
+      "period": "Januari 2024",
+      "fitrah": 15000000,
+      "mal": 8000000,
+      "infak": 12000000,
+      "other": 3000000,
+      "total": 38000000,
+      "transactionCount": 67
+    },
+    {
+      "period": "Februari 2024",
+      "fitrah": 18000000,
+      "mal": 12000000,
+      "infak": 15000000,
+      "other": 4000000,
+      "total": 49000000,
+      "transactionCount": 89
+    },
+    {
+      "period": "Maret 2024",
+      "fitrah": 22000000,
+      "mal": 15000000,
+      "infak": 18000000,
+      "other": 5000000,
+      "total": 60000000,
+      "transactionCount": 112
+    }
+  ],
+  "weekly": [
+    {
+      "period": "Minggu 1 Jan 2024",
+      "fitrah": 3500000,
+      "mal": 2000000,
+      "infak": 2500000,
+      "other": 500000,
+      "total": 8500000,
+      "transactionCount": 15
+    },
+    {
+      "period": "Minggu 2 Jan 2024",
+      "fitrah": 4200000,
+      "mal": 2800000,
+      "infak": 3200000,
+      "other": 800000,
+      "total": 11000000,
+      "transactionCount": 22
+    },
+    {
+      "period": "Minggu 3 Jan 2024",
+      "fitrah": 3800000,
+      "mal": 1800000,
+      "infak": 3500000,
+      "other": 900000,
+      "total": 10000000,
+      "transactionCount": 18
+    },
+    {
+      "period": "Minggu 4 Jan 2024",
+      "fitrah": 3500000,
+      "mal": 1400000,
+      "infak": 2800000,
+      "other": 800000,
+      "total": 8500000,
+      "transactionCount": 12
+    }
+  ],
+  "daily": [
+    {
+      "period": "15 Jan 2024",
+      "fitrah": 500000,
+      "mal": 0,
+      "infak": 0,
+      "other": 0,
+      "total": 500000,
+      "transactionCount": 1
+    },
+    {
+      "period": "14 Jan 2024",
+      "fitrah": 0,
+      "mal": 2000000,
+      "infak": 0,
+      "other": 0,
+      "total": 2000000,
+      "transactionCount": 1
+    },
+    {
+      "period": "13 Jan 2024",
+      "fitrah": 0,
+      "mal": 0,
+      "infak": 1000000,
+      "other": 0,
+      "total": 1000000,
+      "transactionCount": 1
+    }
+  ]
+}

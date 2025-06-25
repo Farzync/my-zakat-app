@@ -1,0 +1,122 @@
+[
+  {
+    "id": "1",
+    "donorName": "Ahmad Wijaya",
+    "recipientName": "Panitia Zakat Masjid Al-Ikhlas",
+    "onBehalfOf": [
+      {
+        "type": "self",
+        "name": "Diri sendiri"
+      },
+      {
+        "type": "family",
+        "name": "Istri (Siti Ahmad)"
+      }
+    ],
+    "amount": 500000,
+    "date": "2024-01-15T10:30:00Z",
+    "paymentMethod": "cash",
+    "zakatType": "fitrah",
+    "notes": "Zakat fitrah untuk 2 orang",
+    "donorSignature": "/signatures/donor1.jpg",
+    "recipientSignature": "/signatures/recipient1.jpg"
+  },
+  {
+    "id": "2",
+    "donorName": "Siti Nurhaliza",
+    "recipientName": "Panitia Zakat Masjid Al-Ikhlas",
+    "onBehalfOf": [
+      {
+        "type": "family",
+        "name": "Suami (Budi Nurhaliza)"
+      },
+      {
+        "type": "family",
+        "name": "Anak 1 (Aisyah)"
+      },
+      {
+        "type": "family",
+        "name": "Anak 2 (Fatimah)"
+      }
+    ],
+    "amount": 2000000,
+    "date": "2024-01-14T14:15:00Z",
+    "paymentMethod": "bank_transfer",
+    "zakatType": "mal",
+    "notes": "Zakat mal dari penghasilan tahunan",
+    "donorSignature": "/signatures/donor2.jpg",
+    "recipientSignature": "/signatures/recipient2.jpg"
+  },
+  {
+    "id": "3",
+    "donorName": "Budi Santoso",
+    "recipientName": "Panitia Zakat Masjid Al-Ikhlas",
+    "onBehalfOf": [
+      {
+        "type": "badal",
+        "name": "Almarhum Ayah (H. Santoso)"
+      }
+    ],
+    "amount": 1000000,
+    "date": "2024-01-13T09:45:00Z",
+    "paymentMethod": "e_wallet",
+    "zakatType": "infak",
+    "notes": "Infak atas nama almarhum",
+    "donorSignature": "/signatures/donor3.jpg",
+    "recipientSignature": "/signatures/recipient3.jpg"
+  },
+  {
+    "id": "4",
+    "donorName": "Fatimah Zahra",
+    "recipientName": "Panitia Zakat Masjid Al-Ikhlas",
+    "onBehalfOf": [
+      {
+        "type": "self",
+        "name": "Diri sendiri"
+      }
+    ],
+    "amount": 750000,
+    "date": "2024-01-12T16:20:00Z",
+    "paymentMethod": "cash",
+    "zakatType": "fitrah",
+    "notes": "Zakat fitrah pribadi",
+    "donorSignature": "/signatures/donor4.jpg",
+    "recipientSignature": "/signatures/recipient4.jpg"
+  },
+  {
+    "id": "5",
+    "donorName": "Muhammad Ali",
+    "recipientName": "Panitia Zakat Masjid Al-Ikhlas",
+    "onBehalfOf": [
+      {
+        "type": "family",
+        "name": "Keluarga besar (8 orang)"
+      }
+    ],
+    "amount": 3500000,
+    "date": "2024-01-11T11:45:00Z",
+    "paymentMethod": "bank_transfer",
+    "zakatType": "mal",
+    "notes": "Zakat mal untuk keluarga besar",
+    "donorSignature": "/signatures/donor5.jpg",
+    "recipientSignature": "/signatures/recipient5.jpg"
+  },
+  {
+    "id": "6",
+    "donorName": "Khadijah Binti Ahmad",
+    "recipientName": "Panitia Zakat Masjid Al-Ikhlas",
+    "onBehalfOf": [
+      {
+        "type": "other",
+        "name": "Yayasan Anak Yatim"
+      }
+    ],
+    "amount": 1500000,
+    "date": "2024-01-10T08:30:00Z",
+    "paymentMethod": "e_wallet",
+    "zakatType": "infak",
+    "notes": "Infak untuk yayasan",
+    "donorSignature": "/signatures/donor6.jpg",
+    "recipientSignature": "/signatures/recipient6.jpg"
+  }
+]
