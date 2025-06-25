@@ -20,7 +20,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { deleteTransaction } from "@/lib/actions"
-import { getAllTransactions, type Transaction } from "@/lib/data"
+import { 
+  getAllTransactions, 
+  getPaymentMethodLabel,
+  getZakatTypeLabel,
+  getOnBehalfOfTypeLabel,
+  ZakatType,
+  type Transaction 
+} from "@/lib/data"
 import { Edit, Trash2, Eye, Search } from "lucide-react"
 import Link from "next/link"
 import { Label } from "@/components/ui/label"
@@ -75,38 +82,19 @@ export function TransactionList() {
     }
   }
 
-  const getPaymentMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
-      cash: "Cash",
-      bank_transfer: "Bank Transfer",
-      e_wallet: "E-Wallet",
-      other: "Lainnya",
+  const getZakatTypeColor = (type: ZakatType) => {
+    const colors: Record<ZakatType, string> = {
+      [ZakatType.FITRAH]: "bg-blue-100 text-blue-800",
+      [ZakatType.MAL]: "bg-green-100 text-green-800",
+      [ZakatType.INFAK]: "bg-yellow-100 text-yellow-800",
+      [ZakatType.OTHER]: "bg-gray-100 text-gray-800",
     }
-    return labels[method] || method
-  }
-
-  const getZakatTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      fitrah: "bg-blue-100 text-blue-800",
-      mal: "bg-green-100 text-green-800",
-      infak: "bg-yellow-100 text-yellow-800",
-      other: "bg-gray-100 text-gray-800",
-    }
-    return colors[type] || colors.other
+    return colors[type] || colors[ZakatType.OTHER]
   }
 
   const formatOnBehalfOf = (onBehalfOf: Transaction["onBehalfOf"]) => {
     return onBehalfOf
-      .map((item) => {
-        const typeLabels = {
-          self: "Diri sendiri",
-          family: "Keluarga",
-          badal: "Badal",
-          other: "Lainnya",
-        }
-        const typeLabel = typeLabels[item.type] || item.type
-        return `${typeLabel}: ${item.name}`
-      })
+      .map((item) => `${getOnBehalfOfTypeLabel(item.type)}: ${item.name}`)
       .join(", ")
   }
 
@@ -141,10 +129,10 @@ export function TransactionList() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Tipe</SelectItem>
-                <SelectItem value="fitrah">Fitrah</SelectItem>
-                <SelectItem value="mal">Mal</SelectItem>
-                <SelectItem value="infak">Infak</SelectItem>
-                <SelectItem value="other">Lainnya</SelectItem>
+                <SelectItem value={ZakatType.FITRAH}>Fitrah</SelectItem>
+                <SelectItem value={ZakatType.MAL}>Mal</SelectItem>
+                <SelectItem value={ZakatType.INFAK}>Infak</SelectItem>
+                <SelectItem value={ZakatType.OTHER}>Lainnya</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -158,7 +146,7 @@ export function TransactionList() {
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-semibold text-lg">{transaction.donorName}</h3>
                       <Badge className={getZakatTypeColor(transaction.zakatType)}>
-                        {transaction.zakatType.charAt(0).toUpperCase() + transaction.zakatType.slice(1)}
+                        {getZakatTypeLabel(transaction.zakatType)}
                       </Badge>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
@@ -198,15 +186,7 @@ export function TransactionList() {
                                   <div className="space-y-1">
                                     {selectedTransaction.onBehalfOf.map((item, index) => (
                                       <p key={index} className="text-sm">
-                                        •{" "}
-                                        {item.type === "self"
-                                          ? "Diri sendiri"
-                                          : item.type === "family"
-                                            ? "Keluarga"
-                                            : item.type === "badal"
-                                              ? "Badal"
-                                              : "Lainnya"}
-                                        : {item.name}
+                                        • {getOnBehalfOfTypeLabel(item.type)}: {item.name}
                                       </p>
                                     ))}
                                   </div>
@@ -228,8 +208,7 @@ export function TransactionList() {
                                 <div>
                                   <Label className="font-semibold">Tipe Zakat</Label>
                                   <Badge className={getZakatTypeColor(selectedTransaction.zakatType)}>
-                                    {selectedTransaction.zakatType.charAt(0).toUpperCase() +
-                                      selectedTransaction.zakatType.slice(1)}
+                                    {getZakatTypeLabel(selectedTransaction.zakatType)}
                                   </Badge>
                                 </div>
                               </div>

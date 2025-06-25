@@ -1,17 +1,39 @@
 import transactionsData from "@/data/transactions.json"
 
+// Enums to match Prisma schema
+export enum ZakatType {
+  FITRAH = "FITRAH",
+  MAL = "MAL",
+  INFAK = "INFAK",
+  OTHER = "OTHER"
+}
+
+export enum OnBehalfOfType {
+  SELF = "SELF",
+  FAMILY = "FAMILY",
+  BADAL = "BADAL",
+  OTHER = "OTHER"
+}
+
+export enum PaymentMethod {
+  CASH = "CASH",
+  BANK_TRANSFER = "BANK_TRANSFER",
+  E_WALLET = "E_WALLET",
+  OTHER = "OTHER"
+}
+
 export interface Transaction {
   id: string
   donorName: string
   recipientName: string
   onBehalfOf: Array<{
-    type: "self" | "family" | "badal" | "other"
+    type: OnBehalfOfType
     name: string
   }>
   amount: number
   date: string
-  paymentMethod: string
-  zakatType: string
+  paymentMethod: PaymentMethod
+  zakatType: ZakatType
   notes?: string
   donorSignature?: string
   recipientSignature?: string
@@ -55,15 +77,15 @@ export async function getTransactionStats() {
       acc.totalCount += 1
 
       switch (transaction.zakatType) {
-        case "fitrah":
+        case ZakatType.FITRAH:
           acc.fitrah += amount
           acc.fitrahCount += 1
           break
-        case "mal":
+        case ZakatType.MAL:
           acc.mal += amount
           acc.malCount += 1
           break
-        case "infak":
+        case ZakatType.INFAK:
           acc.infak += amount
           acc.infakCount += 1
           break
@@ -163,11 +185,11 @@ export async function getReportData(period: "daily" | "weekly" | "monthly" | "ye
       }
     }
     let type = t.zakatType
-    if (type === "fitrah") {
+    if (type === ZakatType.FITRAH) {
       grouped[key].fitrah += t.amount
-    } else if (type === "mal") {
+    } else if (type === ZakatType.MAL) {
       grouped[key].mal += t.amount
-    } else if (type === "infak") {
+    } else if (type === ZakatType.INFAK) {
       grouped[key].infak += t.amount
     } else {
       grouped[key].other += t.amount
@@ -245,13 +267,13 @@ export async function getChartData() {
       const amount = transaction.amount
 
       switch (transaction.zakatType) {
-        case "fitrah":
+        case ZakatType.FITRAH:
           acc.fitrah += amount
           break
-        case "mal":
+        case ZakatType.MAL:
           acc.mal += amount
           break
-        case "infak":
+        case ZakatType.INFAK:
           acc.infak += amount
           break
         default:
@@ -269,4 +291,35 @@ export async function getChartData() {
     { name: "Infak", value: chartData.infak, color: "#f59e0b" },
     { name: "Lainnya", value: chartData.other, color: "#ef4444" },
   ]
+}
+
+// Helper functions for UI labels
+export function getPaymentMethodLabel(method: PaymentMethod): string {
+  const labels: Record<PaymentMethod, string> = {
+    [PaymentMethod.CASH]: "Cash",
+    [PaymentMethod.BANK_TRANSFER]: "Bank Transfer",
+    [PaymentMethod.E_WALLET]: "E-Wallet",
+    [PaymentMethod.OTHER]: "Lainnya",
+  }
+  return labels[method] || method
+}
+
+export function getZakatTypeLabel(type: ZakatType): string {
+  const labels: Record<ZakatType, string> = {
+    [ZakatType.FITRAH]: "Fitrah",
+    [ZakatType.MAL]: "Mal",
+    [ZakatType.INFAK]: "Infak",
+    [ZakatType.OTHER]: "Lainnya",
+  }
+  return labels[type] || type
+}
+
+export function getOnBehalfOfTypeLabel(type: OnBehalfOfType): string {
+  const labels: Record<OnBehalfOfType, string> = {
+    [OnBehalfOfType.SELF]: "Diri sendiri",
+    [OnBehalfOfType.FAMILY]: "Keluarga",
+    [OnBehalfOfType.BADAL]: "Badal",
+    [OnBehalfOfType.OTHER]: "Lainnya",
+  }
+  return labels[type] || type
 }

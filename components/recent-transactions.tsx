@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getRecentTransactions } from "@/lib/data"
+import { getPaymentMethodLabel, getRecentTransactions, getZakatTypeLabel } from "@/lib/data"
 import { formatCurrency, formatDate } from "@/lib/utils"
 
 export async function RecentTransactions() {
@@ -7,16 +7,6 @@ export async function RecentTransactions() {
 
   const formatOnBehalfOf = (onBehalfOf: Array<{ type: string; name: string }>) => {
     return onBehalfOf.map((item) => item.name).join(", ")
-  }
-
-  const getPaymentMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
-      cash: "Cash",
-      bank_transfer: "Bank Transfer",
-      e_wallet: "E-Wallet",
-      other: "Lainnya",
-    }
-    return labels[method] || method
   }
 
   return (
@@ -31,7 +21,8 @@ export async function RecentTransactions() {
               <div className="flex-1">
                 <p className="font-medium">{transaction.donorName}</p>
                 <p className="text-sm text-muted-foreground">
-                  {transaction.zakatType.charAt(0).toUpperCase() + transaction.zakatType.slice(1)} •{" "}
+                  Zakat: {getZakatTypeLabel(transaction.zakatType) } •
+                  {" Tanggal: "}
                   {formatDate(transaction.date)}
                 </p>
                 <p className="text-xs text-muted-foreground">Atas nama: {formatOnBehalfOf(transaction.onBehalfOf)}</p>

@@ -47,7 +47,7 @@ export function ZakatChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Distribusi Zakat</CardTitle>
+        <CardTitle>Total Zakat Terkumpul</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

@@ -12,10 +12,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { createTransaction, updateTransaction } from "@/lib/actions"
 import { Plus, Minus } from "lucide-react"
-import type { Transaction } from "@/lib/data"
+import { 
+  OnBehalfOfType,
+  type Transaction 
+} from "@/lib/data"
 
 interface OnBehalfOfItem {
-  type: "self" | "family" | "badal" | "other"
+  type: OnBehalfOfType
   name: string
 }
 
@@ -29,7 +32,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
   const [error, setError] = useState("")
   const [amount, setAmount] = useState(transaction?.amount?.toString() || "")
   const [onBehalfOfList, setOnBehalfOfList] = useState<OnBehalfOfItem[]>(
-    transaction?.onBehalfOf || [{ type: "self", name: "" }],
+    transaction?.onBehalfOf || [{ type: OnBehalfOfType.SELF, name: "" }],
   )
   const router = useRouter()
 
@@ -44,7 +47,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
   }
 
   const addOnBehalfOfField = () => {
-    setOnBehalfOfList([...onBehalfOfList, { type: "self", name: "" }])
+    setOnBehalfOfList([...onBehalfOfList, { type: OnBehalfOfType.SELF, name: "" }])
   }
 
   const removeOnBehalfOfField = (index: number) => {
@@ -76,16 +79,6 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
     }
 
     setLoading(false)
-  }
-
-  const getTypeLabel = (type: string) => {
-    const labels = {
-      self: "Diri Sendiri",
-      family: "Keluarga",
-      badal: "Badal",
-      other: "Lainnya",
-    }
-    return labels[type as keyof typeof labels] || type
   }
 
   return (
@@ -131,7 +124,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                   <div key={index} className="flex flex-col sm:flex-row gap-2">
                     <Select value={item.type} onValueChange={(value) => updateOnBehalfOfField(index, "type", value)}>
                       <SelectTrigger className="w-full sm:w-40">
-                        <SelectValue placeholder="Pilih tipe" />
+                        <SelectValue placeholder="Pilih atas Nama" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="self">Diri Sendiri</SelectItem>
@@ -208,7 +201,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
               <Label htmlFor="zakatType">Tipe Zakat *</Label>
               <Select name="zakatType" required defaultValue={transaction?.zakatType}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Pilih tipe zakat" />
+                  <SelectValue placeholder="Pilih tipe Zakat" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fitrah">Fitrah</SelectItem>
