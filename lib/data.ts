@@ -1,5 +1,4 @@
 import transactionsData from "@/data/transactions.json"
-import reportsData from "@/data/reports.json"
 import usersData from "@/data/users.json"
 
 export interface Transaction {
@@ -99,9 +98,95 @@ export async function getRecentTransactions(limit = 5): Promise<Transaction[]> {
 }
 
 // Report functions
+function getPeriodKey(date: Date, period: "daily" | "weekly" | "monthly" | "yearly") {
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const day = date.getDate()
+  switch (period) {
+    case "daily":
+      return `${year}-${month + 1}-${day}`
+    case "weekly": {
+      // Week number of year
+      const firstDay = new Date(date.getFullYear(), 0, 1)
+      const days = Math.floor((date.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000))
+      const week = Math.ceil((days + firstDay.getDay() + 1) / 7)
+      return `${year}-W${week}`
+    }
+    case "monthly":
+      return `${year}-${month + 1}`
+    case "yearly":
+      return `${year}`
+    default:
+      return ""
+  }
+}
+
+function getPeriodLabel(date: Date, period: "daily" | "weekly" | "monthly" | "yearly") {
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const day = date.getDate()
+  switch (period) {
+    case "daily":
+      return date.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })
+    case "weekly": {
+      // Week number of year
+      const firstDay = new Date(date.getFullYear(), 0, 1)
+      const days = Math.floor((date.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000))
+      const week = Math.ceil((days + firstDay.getDay() + 1) / 7)
+      return `Minggu ${week} ${year}`
+    }
+    case "monthly":
+      return date.toLocaleDateString("id-ID", { month: "long", year: "numeric" })
+    case "yearly":
+      return `${year}`
+    default:
+      return ""
+  }
+}
+
 export async function getReportData(period: "daily" | "weekly" | "monthly" | "yearly"): Promise<ReportData[]> {
-  const reports = reportsData as Record<string, ReportData[]>
-  return reports[period] || []
+  const transactions = await getAllTransactions()
+  const grouped: Record<string, ReportData> = {}
+
+  for (const t of transactions) {
+    const date = new Date(t.date)
+    const key = getPeriodKey(date, period)
+    const label = getPeriodLabel(date, period)
+    if (!grouped[key]) {
+      grouped[key] = {
+        period: label,
+        fitrah: 0,
+        mal: 0,
+        infak: 0,
+        other: 0,
+        total: 0,
+        transactionCount: 0,
+      }
+    }
+    let type = t.zakatType
+    if (type === "fitrah") {
+      grouped[key].fitrah += t.amount
+    } else if (type === "mal") {
+      grouped[key].mal += t.amount
+    } else if (type === "infak") {
+      grouped[key].infak += t.amount
+    } else {
+      grouped[key].other += t.amount
+    }
+    grouped[key].total += t.amount
+    grouped[key].transactionCount += 1
+  }
+
+  // Sort by period (descending)
+  return Object.values(grouped).sort((a, b) => {
+    // Try to sort by date, fallback to string
+    const aDate = new Date(a.period)
+    const bDate = new Date(b.period)
+    if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+      return bDate.getTime() - aDate.getTime()
+    }
+    return b.period.localeCompare(a.period)
+  })
 }
 
 export async function getFilteredReportData(
@@ -110,10 +195,46 @@ export async function getFilteredReportData(
   endDate?: string,
 ): Promise<ReportData[]> {
   const data = await getReportData(period)
+  if (!startDate && !endDate) return data
 
-  // In a real app, you would filter by actual dates
-  // For now, we'll just return the data as is
-  return data
+  // Filter by period key
+  const start = startDate ? new Date(startDate) : undefined
+  const end = endDate ? new Date(endDate) : undefined
+
+  return data.filter((item) => {
+    // Try to parse date from label
+    let itemDate: Date | null = null
+    try {
+      if (period === "daily") {
+        // e.g. "15 Januari 2024"
+        const [d, m, y] = item.period.split(" ")
+        const monthMap: Record<string, number> = {
+          Januari: 0, Februari: 1, Maret: 2, April: 3, Mei: 4, Juni: 5,
+          Juli: 6, Agustus: 7, September: 8, Oktober: 9, November: 10, Desember: 11,
+        }
+        itemDate = new Date(Number(y), monthMap[m], Number(d))
+      } else if (period === "monthly") {
+        // e.g. "Januari 2024"
+        const [m, y] = item.period.split(" ")
+        const monthMap: Record<string, number> = {
+          Januari: 0, Februari: 1, Maret: 2, April: 3, Mei: 4, Juni: 5,
+          Juli: 6, Agustus: 7, September: 8, Oktober: 9, November: 10, Desember: 11,
+        }
+        itemDate = new Date(Number(y), monthMap[m], 1)
+      } else if (period === "yearly") {
+        itemDate = new Date(Number(item.period), 0, 1)
+      } else {
+        // weekly: fallback, not accurate
+        itemDate = new Date(item.period)
+      }
+    } catch {
+      itemDate = null
+    }
+    if (!itemDate) return true
+    if (start && itemDate < start) return false
+    if (end && itemDate > end) return false
+    return true
+  })
 }
 
 // User functions
