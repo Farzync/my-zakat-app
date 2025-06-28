@@ -56,6 +56,7 @@ import {
   Trash2,
   Eye,
   Search,
+  Plus,
 } from "lucide-react"
 import Link from "next/link"
 import { Label } from "@/components/ui/label"
@@ -154,7 +155,21 @@ export function TransactionList() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Daftar Transaksi</CardTitle>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <CardTitle className="text-xl font-bold tracking-tight">Daftar Transaksi</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Lihat dan kelola semua transaksi zakat di sini
+              </p>
+            </div>
+
+            <Link href="/dashboard/transactions/new">
+              <Button className="bg-primary text-white hover:bg-primary/90 shadow-md">
+                <Plus className="h-4 w-4 mr-2" />
+                Buat Transaksi Baru
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -174,7 +189,21 @@ export function TransactionList() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Daftar Transaksi</CardTitle>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <CardTitle className="text-xl font-bold tracking-tight">Daftar Transaksi</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Lihat dan kelola semua transaksi zakat di sini
+            </p>
+          </div>
+
+          <Link href="/dashboard/transactions/new">
+            <Button className="bg-primary text-white hover:bg-primary/90 shadow-md">
+              <Plus className="h-4 w-4 mr-2" />
+              Buat Transaksi Baru
+            </Button>
+          </Link>
+        </div>
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -218,7 +247,7 @@ export function TransactionList() {
                     <p>Metode: {getPaymentMethodLabel(transaction.paymentMethod)}</p>
                   </div>
                   {transaction.notes && (
-                    <p className="text-sm text-muted-foreground italic">"{transaction.notes}"</p>
+                    <p className="text-sm text-muted-foreground italic">&quot;{transaction.notes}&quot;</p>
                   )}
                 </div>
                 <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-2">

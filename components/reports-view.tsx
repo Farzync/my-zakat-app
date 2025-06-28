@@ -19,7 +19,7 @@ export function ReportsView() {
 
   useEffect(() => {
     generateReport()
-  }, [period])
+  }, [])
 
   const generateReport = async () => {
     setLoading(true)

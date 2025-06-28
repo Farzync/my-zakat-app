@@ -16,6 +16,7 @@ import {
   OnBehalfOfType,
   type Transaction 
 } from "@/lib/data"
+import toast from "react-hot-toast"
 
 interface OnBehalfOfItem {
   type: OnBehalfOfType
@@ -73,9 +74,10 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
     const result = isEdit ? await updateTransaction(transaction!.id, formData) : await createTransaction(formData)
 
     if (result.success) {
+      toast.success("Transaksi berhasil!")
       router.push("/dashboard/transactions")
     } else {
-      setError(result.error || `Gagal ${isEdit ? "mengupdate" : "menyimpan"} transaksi`)
+      setError(result.error || `Gagal ${isEdit ? "memperbarui" : "menyimpan"} transaksi`)
     }
 
     setLoading(false)
@@ -85,7 +87,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
     <div className="max-w-4xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl md:text-2xl">{isEdit ? "Edit" : "Form"} Transaksi Zakat</CardTitle>
+          <CardTitle className="text-xl md:text-2xl">{isEdit ? "Edit Transaksi Zakat Lama" : "Buat Transaksi Zakat Baru"}</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="space-y-6">

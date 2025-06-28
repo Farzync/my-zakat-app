@@ -23,11 +23,11 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Tambah Transaksi", href: "/dashboard/transactions/new", icon: Plus },
   { name: "Daftar Transaksi", href: "/dashboard/transactions", icon: List },
-  { name: "Laporan", href: "/dashboard/reports", icon: BarChart3 },
-  { name: "Export Data", href: "/dashboard/export", icon: FileText },
+  { name: "Laporan Transaksi", href: "/dashboard/reports", icon: BarChart3 },
+  { name: "Export Transaksi", href: "/dashboard/export", icon: FileText },
 ]
 
-const adminNavigation = [{ name: "Kelola User", href: "/dashboard/users", icon: Users }]
+const adminNavigation = [{ name: "Kelola Pengguna", href: "/dashboard/users", icon: Users }]
 
 function SidebarContent({ userRole, onItemClick }: { userRole: string; onItemClick?: () => void }) {
   const pathname = usePathname()
@@ -46,7 +46,21 @@ function SidebarContent({ userRole, onItemClick }: { userRole: string; onItemCli
         <div className="space-y-2">
           {allNavigation.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href
+            const isActive = (() => {
+              if (item.href === "/dashboard") {
+                return pathname === "/dashboard"
+              }
+
+              if (item.href === "/dashboard/transactions") {
+                return (
+                  pathname === "/dashboard/transactions" ||
+                  pathname.startsWith("/dashboard/transactions/edit")
+                )
+              }
+
+              return pathname === item.href
+            })()
+
 
             return (
               <Link

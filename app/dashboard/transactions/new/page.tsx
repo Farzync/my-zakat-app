@@ -11,7 +11,6 @@ export default async function NewTransactionPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Tambah Transaksi Baru</h1>
       <TransactionForm />
     </div>
   )

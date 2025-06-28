@@ -25,7 +25,6 @@ export function ExportForm() {
 
     if (result.success) {
       setSuccess(`Data berhasil diexport! File: ${result.filename}`)
-      // In a real app, you would trigger the download here
     } else {
       setError(result.error || "Gagal mengexport data")
     }
@@ -34,15 +33,15 @@ export function ExportForm() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <Card>
+    <div className="w-full max-w-7xl mx-auto px-4 space-y-6">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle>Filter Export Data</CardTitle>
+          <CardTitle>Export Data Transaksi</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={handleExport} className="space-y-6">
             {/* Date Range */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Tanggal Mulai</Label>
                 <Input id="startDate" name="startDate" type="date" />
@@ -56,7 +55,7 @@ export function ExportForm() {
             {/* Zakat Type Filter */}
             <div className="space-y-2">
               <Label>Tipe Zakat</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox id="fitrah" name="zakatTypes" value="fitrah" defaultChecked />
                   <Label htmlFor="fitrah">Fitrah</Label>
@@ -117,7 +116,7 @@ export function ExportForm() {
             {/* Include Options */}
             <div className="space-y-2">
               <Label>Data yang Disertakan</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox id="summary" name="includes" value="summary" defaultChecked />
                   <Label htmlFor="summary">Ringkasan Total</Label>
@@ -137,6 +136,7 @@ export function ExportForm() {
               </div>
             </div>
 
+            {/* Alerts */}
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -149,6 +149,7 @@ export function ExportForm() {
               </Alert>
             )}
 
+            {/* Submit Button */}
             <Button type="submit" disabled={loading} className="w-full">
               <Download className="h-4 w-4 mr-2" />
               {loading ? "Mengexport..." : "Export Data"}

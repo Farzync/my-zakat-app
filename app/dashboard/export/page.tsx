@@ -11,7 +11,6 @@ export default async function ExportPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Export Data</h1>
       <ExportForm />
     </div>
   )

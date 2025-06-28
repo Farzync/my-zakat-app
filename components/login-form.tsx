@@ -44,7 +44,6 @@ export function LoginForm() {
             await handleSubmit(formData)
           }}
           className={`space-y-4 ${loading ? "pointer-events-none opacity-60" : ""}`}
-          aria-disabled={loading}
         >
           
           {error && (

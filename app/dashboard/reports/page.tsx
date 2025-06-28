@@ -11,7 +11,7 @@ export default async function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Laporan</h1>
+      <h1 className="text-3xl font-bold">Laporan Transaksi Zakat</h1>
       <ReportsView />
     </div>
   )
