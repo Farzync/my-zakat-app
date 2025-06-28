@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { logout } from "@/lib/actions"
-import { LayoutDashboard, Plus, List, BarChart3, FileText, Users, Menu, LogOut, User } from "lucide-react"
+import { LayoutDashboard, Plus, List, BarChart3, FileText, Users, Menu, LogOut, User, HandCoins } from "lucide-react"
 
 interface ResponsiveSidebarProps {
   children: React.ReactNode
@@ -35,8 +35,11 @@ function SidebarContent({ userRole, onItemClick }: { userRole: string; onItemCli
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 border-b">
-        <h2 className="text-xl font-bold text-gray-800">Zakat Management</h2>
+      <div className="p-5 border-b">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <HandCoins className="h-5 w-5 sm:h-6 sm:w-6" />
+          <h2 className="text-lg font-bold text-gray-800">Zakat Management</h2>
+        </div>
       </div>
 
       <nav className="flex-1 p-4">
