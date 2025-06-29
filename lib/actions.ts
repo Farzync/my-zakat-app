@@ -9,7 +9,8 @@ import {
   deleteTransaction as deleteTransactionDb,
   PaymentMethod,
   ZakatType,
-  OnBehalfOfType
+  OnBehalfOfType,
+  getPaginatedTransactions
 } from "@/lib/data"
 
 export async function login(formData: FormData) {
@@ -181,5 +182,15 @@ export async function exportData(formData: FormData) {
   return {
     success: true,
     filename: `${filename}.${exportConfig.formats.includes("excel") ? "xlsx" : "pdf"}`,
+  }
+}
+
+export async function fetchPaginatedTransactions(page: number = 1, limit: number = 10) {
+  "use server"
+  try {
+    const result = await getPaginatedTransactions(page, limit)
+    return { success: true, ...result }
+  } catch (error) {
+    return { success: false, error: "Gagal mengambil data transaksi" }
   }
 }

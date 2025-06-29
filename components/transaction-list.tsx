@@ -37,13 +37,12 @@ import {
 } from "@/components/ui/alert-dialog"
 import {
   formatCurrency,
-  formatDate,
 } from "@/lib/utils"
 import {
   deleteTransaction,
+  fetchPaginatedTransactions,
 } from "@/lib/actions"
 import {
-  getPaginatedTransactions,
   getPaymentMethodLabel,
   getZakatTypeLabel,
   getOnBehalfOfTypeLabel,
@@ -91,15 +90,24 @@ export function TransactionList() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true)
-      const data = await getPaginatedTransactions(currentPage, entriesPerPage)
-      setTransactions(data.transactions)
-      setFilteredTransactions(data.transactions)
-      setTotalPages(data.totalPages)
-      setTotalEntries(data.totalItems)
+      const data = await fetchPaginatedTransactions(currentPage, entriesPerPage)
+      if (data && typeof data === 'object' && 'success' in data && data.success && 'transactions' in data) {
+        setTransactions(data.transactions)
+        setFilteredTransactions(data.transactions)
+        setTotalPages(data.totalPages)
+        setTotalEntries(data.totalItems)
+      } else {
+        setTransactions([])
+        setFilteredTransactions([])
+        setTotalPages(1)
+        setTotalEntries(0)
+        // Optionally, show an error message to the user
+        // e.g. toast.error(data && typeof data === 'object' && 'error' in data ? data.error : 'Gagal mengambil data')
+      }
       setLoading(false)
     }
     fetchData()
-  }, [currentPage, entriesPerPage])
+    }, [currentPage, entriesPerPage])
 
   // Update search/filter
   useEffect(() => {
@@ -136,13 +144,16 @@ export function TransactionList() {
   }
 
   const getZakatTypeColor = (type: ZakatType) => {
+    const baseClasses = "ml-2 rounded-full px-2.5 py-0.5 text-sm font-medium transition-colors duration-150";
+
     const colors: Record<ZakatType, string> = {
-      [ZakatType.FITRAH]: "bg-blue-100 text-blue-800",
-      [ZakatType.MAL]: "bg-green-100 text-green-800",
-      [ZakatType.INFAK]: "bg-yellow-100 text-yellow-800",
-      [ZakatType.OTHER]: "bg-gray-100 text-gray-800",
+      [ZakatType.FITRAH]: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+      [ZakatType.MAL]: "bg-green-100 text-green-800 hover:bg-green-200",
+      [ZakatType.INFAK]: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
+      [ZakatType.OTHER]: "bg-gray-100 text-gray-800 hover:bg-gray-200",
     }
-    return colors[type] || colors[ZakatType.OTHER]
+
+    return `${baseClasses} ${colors[type] || colors[ZakatType.OTHER]}`
   }
 
   const formatOnBehalfOf = (onBehalfOf: Transaction["onBehalfOf"]) => {
@@ -242,16 +253,12 @@ export function TransactionList() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
                     <p>Penerima: {transaction.recipientName}</p>
-                    <p>Tanggal: {formatDate(transaction.date)}</p>
-                    <p className="sm:col-span-2">Atas nama: {formatOnBehalfOf(transaction.onBehalfOf)}</p>
-                    <p>Metode: {getPaymentMethodLabel(transaction.paymentMethod)}</p>
+                    <p>Tanggal: {transaction.date.toLocaleDateString()}</p>
+                    <p>Nominal Zakat: {formatCurrency(transaction.amount)}</p>
+                    <p>Metode Pembayaran: {getPaymentMethodLabel(transaction.paymentMethod)}</p>
                   </div>
-                  {transaction.notes && (
-                    <p className="text-sm text-muted-foreground italic">&quot;{transaction.notes}&quot;</p>
-                  )}
                 </div>
                 <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-2">
-                  <p className="text-xl font-bold text-green-600">{formatCurrency(transaction.amount)}</p>
                   <div className="flex gap-2">
                     <Dialog>
                       <DialogTrigger asChild>
@@ -259,73 +266,95 @@ export function TransactionList() {
                           <Eye className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Detail Transaksi</DialogTitle>
+                      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                        <DialogHeader className="pb-4 border-b">
+                          <DialogTitle className="text-xl font-bold">Detail Transaksi</DialogTitle>
                         </DialogHeader>
                         {selectedTransaction && (
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <Label className="font-semibold">Nama Pemberi Zakat</Label>
-                                <p>{selectedTransaction.donorName}</p>
+                          <div className="space-y-6 py-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Nama Pemberi Zakat</Label>
+                                <p className="text-lg font-medium">{selectedTransaction.donorName}</p>
                               </div>
-                              <div>
-                                <Label className="font-semibold">Nama Penerima</Label>
-                                <p>{selectedTransaction.recipientName}</p>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Nama Penerima</Label>
+                                <p className="text-lg font-medium">{selectedTransaction.recipientName}</p>
                               </div>
-                              <div className="sm:col-span-2">
-                                <Label className="font-semibold">Atas Nama</Label>
-                                <div className="space-y-1">
+                              <div className="lg:col-span-2 space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Atas Nama</Label>
+                                <div className="bg-gray-50 rounded-lg p-3 space-y-1">
                                   {selectedTransaction.onBehalfOf.map((item, index) => (
-                                    <p key={index} className="text-sm">
-                                      • {getOnBehalfOfTypeLabel(item.type)}: {item.name}
+                                    <p key={index} className="text-sm flex items-center gap-2">
+                                      <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
+                                      <span className="font-medium">{getOnBehalfOfTypeLabel(item.type)}:</span> {item.name}
                                     </p>
                                   ))}
                                 </div>
                               </div>
-                              <div>
-                                <Label className="font-semibold">Nominal</Label>
-                                <p className="text-lg font-bold text-green-600">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Nominal</Label>
+                                <p className="text-2xl font-bold text-green-600">
                                   {formatCurrency(selectedTransaction.amount)}
                                 </p>
                               </div>
-                              <div>
-                                <Label className="font-semibold">Tanggal</Label>
-                                <p>{formatDate(selectedTransaction.date)}</p>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Tanggal</Label>
+                                <p className="text-lg font-medium">{selectedTransaction.date.toLocaleDateString('id-ID', { 
+                                  weekday: 'long', 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })}</p>
                               </div>
-                              <div>
-                                <Label className="font-semibold">Metode Pembayaran</Label>
-                                <p>{getPaymentMethodLabel(selectedTransaction.paymentMethod)}</p>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Metode Pembayaran</Label>
+                                <p className="text-lg font-medium">{getPaymentMethodLabel(selectedTransaction.paymentMethod)}</p>
                               </div>
-                              <div>
-                                <Label className="font-semibold">Tipe Zakat</Label>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Tipe Zakat</Label>
                                 <Badge className={getZakatTypeColor(selectedTransaction.zakatType)}>
                                   {getZakatTypeLabel(selectedTransaction.zakatType)}
                                 </Badge>
                               </div>
                             </div>
+                            
                             {selectedTransaction.notes && (
-                              <div>
-                                <Label className="font-semibold">Catatan</Label>
-                                <p>{selectedTransaction.notes}</p>
-                              </div>
-                            )}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <Label className="font-semibold">Tanda Tangan Pemberi</Label>
-                                <div className="mt-2 border rounded p-2 bg-gray-50">
-                                  <p className="text-sm text-muted-foreground">
-                                    File: {selectedTransaction.donorSignature}
-                                  </p>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Catatan</Label>
+                                <div className="bg-gray-50 rounded-lg p-4 border-l-4">
+                                  <p className="text-gray-700">{selectedTransaction.notes}</p>
                                 </div>
                               </div>
-                              <div>
-                                <Label className="font-semibold">Tanda Tangan Penerima</Label>
-                                <div className="mt-2 border rounded p-2 bg-gray-50">
-                                  <p className="text-sm text-muted-foreground">
-                                    File: {selectedTransaction.recipientSignature}
-                                  </p>
+                            )}
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t">
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Tanda Tangan Pemberi</Label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[200px] flex items-center justify-center">
+                                  {selectedTransaction.donorSignature ? (
+                                    <img 
+                                      src={selectedTransaction.donorSignature} 
+                                      alt="Tanda tangan pemberi"
+                                      className="max-w-full max-h-[180px] object-contain"
+                                    />
+                                  ) : (
+                                    <p className="text-gray-400 text-sm">Tidak ada tanda tangan</p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Tanda Tangan Penerima</Label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[200px] flex items-center justify-center">
+                                  {selectedTransaction.recipientSignature ? (
+                                    <img 
+                                      src={selectedTransaction.recipientSignature} 
+                                      alt="Tanda tangan penerima"
+                                      className="max-w-full max-h-[180px] object-contain"
+                                    />
+                                  ) : (
+                                    <p className="text-gray-400 text-sm">Tidak ada tanda tangan</p>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -333,6 +362,7 @@ export function TransactionList() {
                         )}
                       </DialogContent>
                     </Dialog>
+
                     <Link href={`/dashboard/transactions/edit/${transaction.id}`} >
                       <Button size="sm" variant="outline">
                         <Edit className="h-4 w-4" />
