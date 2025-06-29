@@ -11,12 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { createTransaction, updateTransaction } from "@/lib/actions"
-import { Plus, Minus } from "lucide-react"
+import { Plus, Minus, Pen } from "lucide-react"
 import { 
   OnBehalfOfType,
   type Transaction 
 } from "@/lib/data"
 import toast from "react-hot-toast"
+import { SignatureDialog } from "@/components/signature-dialog"
 
 interface OnBehalfOfItem {
   type: OnBehalfOfType
@@ -31,10 +32,13 @@ interface TransactionFormProps {
 export function TransactionForm({ transaction, isEdit = false }: TransactionFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [amount, setAmount] = useState(transaction?.amount?.toString() || "")
   const [onBehalfOfList, setOnBehalfOfList] = useState<OnBehalfOfItem[]>(
     transaction?.onBehalfOf || [{ type: OnBehalfOfType.SELF, name: "" }],
   )
+  const [donorSignature, setDonorSignature] = useState<string>(transaction?.donorSignature || "")
+  const [recipientSignature, setRecipientSignature] = useState<string>(transaction?.recipientSignature || "")
+  const [isDonorSignatureDialogOpen, setIsDonorSignatureDialogOpen] = useState(false)
+  const [isRecipientSignatureDialogOpen, setIsRecipientSignatureDialogOpen] = useState(false)
   const router = useRouter()
 
   const formatCurrency = (value: string) => {
@@ -42,9 +46,15 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
   }
 
+  const initialFormattedAmount = transaction ? "Rp. " + formatCurrency(transaction.amount.toString()) : "Rp. 0";
+
+  const [amount, setAmount] = useState(initialFormattedAmount)
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCurrency(e.target.value)
-    setAmount(formatted)
+    let raw = e.target.value.replace(/\D/g, "")
+    raw = raw.replace(/^0+(?!$)/, "")
+    const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    setAmount("Rp. " + formatted)
   }
 
   const addOnBehalfOfField = () => {
@@ -63,15 +73,40 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
     setOnBehalfOfList(updated)
   }
 
-  async function handleSubmit(formData: FormData) {
+  const handleDonorSignatureSave = (signatureData: string) => {
+    setDonorSignature(signatureData)
+    setIsDonorSignatureDialogOpen(false)
+  }
+
+  const handleRecipientSignatureSave = (signatureData: string) => {
+    setRecipientSignature(signatureData)
+    setIsRecipientSignatureDialogOpen(false)
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setLoading(true)
     setError("")
 
-    // Add processed data to formData
-    formData.set("amount", amount.replace(/\./g, ""))
-    formData.set("onBehalfOf", JSON.stringify(onBehalfOfList.filter((item) => item.name.trim())))
+    // Validate signatures
+    if (!donorSignature || !recipientSignature) {
+      setError("Tanda tangan pemberi zakat dan penerima harus diisi")
+      setLoading(false)
+      return
+    }
 
-    const result = isEdit ? await updateTransaction(transaction!.id, formData) : await createTransaction(formData)
+    const form = e.currentTarget
+    const formData = new FormData(form)
+
+    // Format ulang amount dan onBehalfOf
+    formData.set("amount", amount.replace(/\./g, "").replace("Rp ", ""))
+    formData.set("onBehalfOf", JSON.stringify(onBehalfOfList.filter((item) => item.name.trim())))
+    formData.set("donorSignature", donorSignature)
+    formData.set("recipientSignature", recipientSignature)
+
+    const result = isEdit
+      ? await updateTransaction(transaction!.id, formData)
+      : await createTransaction(formData)
 
     if (result.success) {
       toast.success("Transaksi berhasil!")
@@ -90,7 +125,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
           <CardTitle className="text-xl md:text-2xl">{isEdit ? "Edit Transaksi Zakat Lama" : "Buat Transaksi Zakat Baru"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -129,10 +164,10 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                         <SelectValue placeholder="Pilih atas Nama" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="self">Diri Sendiri</SelectItem>
-                        <SelectItem value="family">Keluarga</SelectItem>
-                        <SelectItem value="badal">Badal</SelectItem>
-                        <SelectItem value="other">Lainnya</SelectItem>
+                        <SelectItem value="SELF">Diri Sendiri</SelectItem>
+                        <SelectItem value="FAMILY">Keluarga</SelectItem>
+                        <SelectItem value="BADAL">Badal</SelectItem>
+                        <SelectItem value="OTHER">Lainnya</SelectItem>
                       </SelectContent>
                     </Select>
                     <Input
@@ -170,30 +205,30 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
             {/* Amount and Payment Details */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="amount">Nominal (Rp) *</Label>
+                <label htmlFor="amount">Nominal (Rp) *</label>
                 <Input
                   id="amount"
                   type="text"
                   required
                   placeholder="0"
+                  inputMode="numeric"
                   value={amount}
                   onChange={handleAmountChange}
                   className="w-full"
                 />
-                {amount && <p className="text-xs text-muted-foreground">Rp {amount}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="paymentMethod">Metode Pembayaran *</Label>
-                <Select name="paymentMethod" required defaultValue={transaction?.paymentMethod}>
+                <Select name="paymentMethod" required defaultValue={transaction?.paymentMethod ?? undefined}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Pilih metode pembayaran" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                    <SelectItem value="e_wallet">E-Wallet</SelectItem>
-                    <SelectItem value="other">Lainnya</SelectItem>
+                    <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                    <SelectItem value="E_WALLET">E-Wallet</SelectItem>
+                    <SelectItem value="OTHER">Lainnya</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -206,40 +241,62 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                   <SelectValue placeholder="Pilih tipe Zakat" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fitrah">Fitrah</SelectItem>
-                  <SelectItem value="mal">Mal</SelectItem>
-                  <SelectItem value="infak">Infak</SelectItem>
-                  <SelectItem value="other">Lainnya</SelectItem>
+                  <SelectItem value="FITRAH">Fitrah</SelectItem>
+                  <SelectItem value="MAL">Mal</SelectItem>
+                  <SelectItem value="INFAK">Infak</SelectItem>
+                  <SelectItem value="OTHER">Lainnya</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Signature Uploads */}
+            {/* Signature Fields */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="donorSignature">Tanda Tangan Pemberi Zakat *</Label>
-                <Input
-                  id="donorSignature"
-                  name="donorSignature"
-                  type="file"
-                  accept="image/*"
-                  required={!isEdit}
-                  className="w-full"
-                />
-                <p className="text-sm text-muted-foreground">Format: JPG, PNG, maksimal 2MB</p>
+                <Label>Tanda Tangan Pemberi Zakat *</Label>
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDonorSignatureDialogOpen(true)}
+                    className="w-full flex items-center gap-2"
+                  >
+                    <Pen className="h-4 w-4" />
+                    {donorSignature ? "Edit Tanda Tangan" : "Buat Tanda Tangan"}
+                  </Button>
+                  {donorSignature && (
+                    <div className="border rounded-lg p-2">
+                      <img 
+                        src={donorSignature} 
+                        alt="Tanda tangan pemberi zakat" 
+                        className="max-h-20 mx-auto"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="recipientSignature">Tanda Tangan Penerima (Panitia) *</Label>
-                <Input
-                  id="recipientSignature"
-                  name="recipientSignature"
-                  type="file"
-                  accept="image/*"
-                  required={!isEdit}
-                  className="w-full"
-                />
-                <p className="text-sm text-muted-foreground">Format: JPG, PNG, maksimal 2MB</p>
+                <Label>Tanda Tangan Penerima (Panitia) *</Label>
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsRecipientSignatureDialogOpen(true)}
+                    className="w-full flex items-center gap-2"
+                  >
+                    <Pen className="h-4 w-4" />
+                    {recipientSignature ? "Edit Tanda Tangan" : "Buat Tanda Tangan"}
+                  </Button>
+                  {recipientSignature && (
+                    <div className="border rounded-lg p-2">
+                      <img 
+                        src={recipientSignature} 
+                        alt="Tanda tangan penerima" 
+                        className="max-h-20 mx-auto"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -272,6 +329,23 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
           </form>
         </CardContent>
       </Card>
+
+      {/* Signature Dialogs */}
+      <SignatureDialog
+        open={isDonorSignatureDialogOpen}
+        onOpenChange={setIsDonorSignatureDialogOpen}
+        onSave={handleDonorSignatureSave}
+        title="Tanda Tangan Pemberi Zakat"
+        existingSignature={donorSignature}
+      />
+
+      <SignatureDialog
+        open={isRecipientSignatureDialogOpen}
+        onOpenChange={setIsRecipientSignatureDialogOpen}
+        onSave={handleRecipientSignatureSave}
+        title="Tanda Tangan Penerima (Panitia)"
+        existingSignature={recipientSignature}
+      />
     </div>
   )
 }
