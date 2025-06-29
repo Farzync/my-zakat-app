@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getPaymentMethodLabel, getRecentTransactions, getZakatTypeLabel } from "@/lib/data"
-import { formatCurrency, formatDate } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 
 export async function RecentTransactions() {
   const transactions = await getRecentTransactions()
@@ -23,7 +23,7 @@ export async function RecentTransactions() {
                 <p className="text-sm text-muted-foreground">
                   Zakat: {getZakatTypeLabel(transaction.zakatType) } •
                   {" Tanggal: "}
-                  {formatDate(transaction.date)}
+                  {transaction.date.toLocaleDateString()}
                 </p>
                 <p className="text-xs text-muted-foreground">Atas nama: {formatOnBehalfOf(transaction.onBehalfOf)}</p>
               </div>
