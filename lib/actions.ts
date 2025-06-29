@@ -10,7 +10,8 @@ import {
   PaymentMethod,
   ZakatType,
   OnBehalfOfType,
-  getPaginatedTransactions
+  getPaginatedTransactions,
+  getFilteredReportData
 } from "@/lib/data"
 
 export async function login(formData: FormData) {
@@ -193,4 +194,9 @@ export async function fetchPaginatedTransactions(page: number = 1, limit: number
   } catch (error) {
     return { success: false, error: "Gagal mengambil data transaksi" }
   }
+}
+
+export async function generateReportAction({ period, startDate, endDate }: { period: "daily" | "weekly" | "monthly" | "yearly", startDate?: string, endDate?: string }) {
+  const data = await getFilteredReportData(period, startDate, endDate)
+  return data
 }

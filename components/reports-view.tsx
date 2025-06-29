@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency } from "@/lib/utils"
-import { getFilteredReportData, type ReportData } from "@/lib/data"
 import { BarChart3, TrendingUp, Calendar, Users, PieChart, Filter } from "lucide-react"
+import { ReportData } from "@/lib/data"
+import { generateReportAction } from "@/lib/actions"
 
 export function ReportsView() {
   const [reportData, setReportData] = useState<ReportData[]>([])
@@ -25,7 +26,7 @@ export function ReportsView() {
   const generateReport = async () => {
     setLoading(true)
     try {
-      const data = await getFilteredReportData(period, startDate, endDate)
+      const data = await generateReportAction({ period, startDate, endDate })
       setReportData(data)
     } catch (error) {
       console.error("Error generating report:", error)
