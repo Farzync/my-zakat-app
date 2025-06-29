@@ -1,8 +1,16 @@
 "use server"
 
-import { authenticateUser, createSession, deleteSession } from "@/lib/auth"
+import { authenticateUser, createSession, deleteSession, verifySession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import {
+  createTransaction as createTransactionDb,
+  updateTransaction as updateTransactionDb,
+  deleteTransaction as deleteTransactionDb,
+  PaymentMethod,
+  ZakatType,
+  OnBehalfOfType
+} from "@/lib/data"
 
 export async function login(formData: FormData) {
   const username = formData.get("username") as string
@@ -31,6 +39,9 @@ export async function createTransaction(formData: FormData) {
   // Get current timestamp for transaction date
   const currentDate = new Date().toISOString()
 
+  // Verify session to get user ID
+  const session = await verifySession()
+
   const onBehalfOfData = formData.get("onBehalfOf") as string
   let onBehalfOf
   try {
@@ -40,37 +51,55 @@ export async function createTransaction(formData: FormData) {
   }
 
   const transactionData = {
-    id: Date.now().toString(), // Simple ID generation
-    donorName: formData.get("donorName"),
-    recipientName: formData.get("recipientName"),
-    onBehalfOf: onBehalfOf,
+    donorName: formData.get("donorName") as string,
+    recipientName: formData.get("recipientName") as string,
+    onBehalfOf: onBehalfOf as Array<{ type: OnBehalfOfType; name: string }>,
     amount: Number.parseInt(formData.get("amount") as string),
-    date: currentDate,
-    paymentMethod: formData.get("paymentMethod"),
-    zakatType: formData.get("zakatType"),
-    notes: formData.get("notes"),
-    donorSignature: formData.get("donorSignature"),
-    recipientSignature: formData.get("recipientSignature"),
+    date: new Date(currentDate),
+    paymentMethod: formData.get("paymentMethod") as PaymentMethod,
+    zakatType: formData.get("zakatType") as ZakatType,
+    notes: formData.get("notes") as string,
+    donorSignature: formData.get("donorSignature") as string,
+    recipientSignature: formData.get("recipientSignature") as string,
+    userId: session?.id as string, // Use session user ID or fallback to form data
   }
 
-  // Validate required fields
-  if (
-    !transactionData.donorName ||
-    !transactionData.recipientName ||
-    !transactionData.onBehalfOf ||
-    !transactionData.amount ||
-    !transactionData.donorSignature ||
-    !transactionData.recipientSignature
-  ) {
-    return { success: false, error: "Semua field wajib harus diisi termasuk kedua tanda tangan" }
+  if (!transactionData.donorName) {
+    return { success: false, error: "Nama muzakki (donor) wajib diisi." }
   }
 
-  // Here you would save to database
-  console.log("Creating transaction:", transactionData)
+  if (!transactionData.recipientName) {
+    return { success: false, error: "Nama penerima (amil/panitia zakat) wajib diisi." }
+  }
 
-  revalidatePath("/dashboard/transactions")
-  revalidatePath("/dashboard")
-  return { success: true }
+  if (!transactionData.onBehalfOf || transactionData.onBehalfOf.length === 0) {
+    return { success: false, error: "Data atas nama (onBehalfOf) minimal 1 orang harus diisi." }
+  }
+
+  if (!transactionData.amount || transactionData.amount <= 0) {
+    return { success: false, error: "Nominal zakat tidak boleh kosong atau nol." }
+  }
+
+  if (!transactionData.donorSignature) {
+    return { success: false, error: "Tanda tangan muzakki (donor) wajib diisi." }
+  }
+
+  if (!transactionData.recipientSignature) {
+    return { success: false, error: "Tanda tangan penerima (amil) wajib diisi." }
+  }
+
+  if (!transactionData.userId) {
+    return { success: false, error: "User ID tidak ditemukan. Silakan login ulang." }
+  }
+
+  try {
+    await createTransactionDb(transactionData)
+    revalidatePath("/dashboard/transactions")
+    revalidatePath("/dashboard")
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: "Gagal membuat transaksi" }
+  }
 }
 
 export async function updateTransaction(id: string, formData: FormData) {
@@ -83,13 +112,15 @@ export async function updateTransaction(id: string, formData: FormData) {
   }
 
   const transactionData = {
-    donorName: formData.get("donorName"),
-    recipientName: formData.get("recipientName"),
-    onBehalfOf: onBehalfOf,
+    donorName: formData.get("donorName") as string,
+    recipientName: formData.get("recipientName") as string,
+    onBehalfOf: onBehalfOf as Array<{ type: OnBehalfOfType; name: string }>,
     amount: Number.parseInt(formData.get("amount") as string),
-    paymentMethod: formData.get("paymentMethod"),
-    zakatType: formData.get("zakatType"),
-    notes: formData.get("notes"),
+    paymentMethod: formData.get("paymentMethod") as PaymentMethod,
+    zakatType: formData.get("zakatType") as ZakatType,
+    notes: formData.get("notes") as string,
+    donorSignature: formData.get("donorSignature") as string,
+    recipientSignature: formData.get("recipientSignature") as string,
   }
 
   // Validate required fields
@@ -102,21 +133,28 @@ export async function updateTransaction(id: string, formData: FormData) {
     return { success: false, error: "Semua field wajib harus diisi" }
   }
 
-  // Here you would update in database
-  console.log("Updating transaction:", id, transactionData)
-
-  revalidatePath("/dashboard/transactions")
-  revalidatePath("/dashboard")
-  return { success: true }
+  try {
+    await updateTransactionDb(id, transactionData)
+    revalidatePath("/dashboard/transactions")
+    revalidatePath("/dashboard")
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: "Gagal mengupdate transaksi" }
+  }
 }
 
 export async function deleteTransaction(id: string) {
-  // Here you would delete from database
-  console.log("Deleting transaction:", id)
-
-  revalidatePath("/dashboard/transactions")
-  revalidatePath("/dashboard")
-  return { success: true }
+  try {
+    const result = await deleteTransactionDb(id)
+    if (!result) {
+      return { success: false, error: "Gagal menghapus transaksi" }
+    }
+    revalidatePath("/dashboard/transactions")
+    revalidatePath("/dashboard")
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: "Gagal menghapus transaksi" }
+  }
 }
 
 export async function exportData(formData: FormData) {

@@ -22,17 +22,20 @@ export async function decrypt(input: string): Promise<any> {
 
 export async function authenticateUser(username: string, password: string) {
   const user = await getUserByCredentials(username, password)
-  if (!user) {
-    return null
-  }
+  if (!user) return null
 
-  const { password: _, ...userWithoutPassword } = user
-  return userWithoutPassword
+  const { id, username: uname, name, role } = user
+  return { id, username: uname, name, role }
 }
 
-export async function createSession(user: any) {
-  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-  const session = await encrypt({ user, expires })
+export async function createSession(user: {
+  id: string
+  username: string
+  name: string
+  role: string
+}) {
+  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 jam
+  const session = await encrypt({ user }) // simple!
 
   const cookieStore = await cookies()
   cookieStore.set("session", session, {
@@ -44,7 +47,12 @@ export async function createSession(user: any) {
   })
 }
 
-export async function verifySession() {
+export async function verifySession(): Promise<{
+  id: string
+  username: string
+  name: string
+  role: string
+} | null> {
   const cookieStore = await cookies()
   const cookie = cookieStore.get("session")?.value
 
@@ -52,8 +60,8 @@ export async function verifySession() {
 
   try {
     const session = await decrypt(cookie)
-    return session
-  } catch (error) {
+    return session.user
+  } catch {
     return null
   }
 }

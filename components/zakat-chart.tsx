@@ -1,7 +1,4 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useEffect, useState } from "react"
 import { getChartData } from "@/lib/data"
 
 interface ChartData {
@@ -10,39 +7,26 @@ interface ChartData {
   color: string
 }
 
-export function ZakatChart() {
-  const [data, setData] = useState<ChartData[]>([])
-  const [loading, setLoading] = useState(true)
+interface RawChartData {
+  fitrah: number
+  mal: number
+  infak: number
+  other: number
+}
 
-  useEffect(() => {
-    async function fetchChartData() {
-      try {
-        const chartData = await getChartData()
-        setData(chartData)
-      } catch (error) {
-        console.error("Error fetching chart data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+function formatChartData(data: RawChartData): ChartData[] {
+  return [
+    { name: "Fitrah", value: data.fitrah, color: "#3b82f6" },
+    { name: "Mal", value: data.mal, color: "#10b981" },
+    { name: "Infak", value: data.infak, color: "#f59e0b" },
+    { name: "Lainnya", value: data.other, color: "#ef4444" },
+  ]
+}
 
-    fetchChartData()
-  }, [])
-
+export default async function ZakatChart() {
+  const raw = await getChartData()
+  const data = formatChartData(raw)
   const total = data.reduce((sum, item) => sum + item.value, 0)
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Distribusi Zakat</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">Loading...</div>
-        </CardContent>
-      </Card>
-    )
-  }
 
   return (
     <Card>

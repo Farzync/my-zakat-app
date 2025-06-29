@@ -633,22 +633,22 @@ export async function getFilteredReportData(
 // Chart data functions
 export async function getChartData() {
   const aggregations = await prisma.transaction.groupBy({
-    by: ['zakatType'],
+    by: ["zakatType"],
     _sum: {
-      amount: true
-    }
+      amount: true,
+    },
   })
 
   const chartData = {
     fitrah: 0,
     mal: 0,
     infak: 0,
-    other: 0
+    other: 0,
   }
 
   for (const agg of aggregations) {
     const amount = Number(agg._sum.amount || 0)
-    
+
     switch (agg.zakatType) {
       case ZakatType.FITRAH:
         chartData.fitrah = amount
@@ -664,12 +664,7 @@ export async function getChartData() {
     }
   }
 
-  return [
-    { name: "Fitrah", value: chartData.fitrah, color: "#3b82f6" },
-    { name: "Mal", value: chartData.mal, color: "#10b981" },
-    { name: "Infak", value: chartData.infak, color: "#f59e0b" },
-    { name: "Lainnya", value: chartData.other, color: "#ef4444" },
-  ]
+  return chartData
 }
 
 // User functions
@@ -800,9 +795,4 @@ export function getUserRoleLabel(role: UserRole): string {
     [UserRole.STAFF]: "Staff",
   }
   return labels[role] || role
-}
-
-// Cleanup function to disconnect Prisma client
-export async function disconnectDatabase(): Promise<void> {
-  await prisma.$disconnect()
 }

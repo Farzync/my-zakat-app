@@ -16,7 +16,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <ResponsiveSidebar user={session.user}>
+      <ResponsiveSidebar user={session}>
         <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
       </ResponsiveSidebar>
     </div>
