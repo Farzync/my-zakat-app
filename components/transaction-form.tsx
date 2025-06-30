@@ -266,6 +266,19 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
               </Select>
             </div>
 
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label htmlFor="notes">Catatan</Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                placeholder="Catatan tambahan (opsional)"
+                rows={3}
+                defaultValue={transaction?.notes !== null ? transaction?.notes : ''}
+                className="w-full"
+              />
+            </div>
+
             {/* Signature Fields */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -319,18 +332,6 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                   )}
                 </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">Catatan</Label>
-              <Textarea
-                id="notes"
-                name="notes"
-                placeholder="Catatan tambahan (opsional)"
-                rows={3}
-                defaultValue={transaction?.notes !== null ? transaction?.notes : ''}
-                className="w-full"
-              />
             </div>
 
             {error && (

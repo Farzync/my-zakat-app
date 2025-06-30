@@ -13,13 +13,6 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -40,12 +33,12 @@ import {
   type Transaction,
 } from '@/lib/data'
 
-import { Edit, Trash2, Eye, Search, Plus } from 'lucide-react'
+import { Edit, Trash2, Search, Plus } from 'lucide-react'
 import Link from 'next/link'
-import { Label } from '@/components/ui/label'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
-import Image from 'next/image'
+import { TransactionDetailDialog } from '@/components/transaction-detail-dialog'
+import toast from 'react-hot-toast'
 
 export function TransactionList() {
   const searchParams = useSearchParams()
@@ -128,6 +121,7 @@ export function TransactionList() {
   const handleDelete = async (id: string) => {
     const result = await deleteTransaction(id)
     if (result.success) {
+      toast.success('Transaksi berhasil dihapus')
       setTransactions(transactions.filter(t => t.id !== id))
     }
   }
@@ -247,147 +241,17 @@ export function TransactionList() {
                 </div>
                 <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-2">
                   <div className="flex gap-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedTransaction(transaction)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-                        <DialogHeader className="pb-4 border-b">
-                          <DialogTitle className="text-xl font-bold">Detail Transaksi</DialogTitle>
-                        </DialogHeader>
-                        {selectedTransaction && (
-                          <div className="space-y-6 py-4">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                              <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Nama Pemberi Zakat
-                                </Label>
-                                <p className="text-lg font-medium">
-                                  {selectedTransaction.donorName}
-                                </p>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Nama Penerima
-                                </Label>
-                                <p className="text-lg font-medium">
-                                  {selectedTransaction.recipientName}
-                                </p>
-                              </div>
-                              <div className="lg:col-span-2 space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Atas Nama
-                                </Label>
-                                <div className="bg-gray-50 rounded-lg p-3 space-y-1">
-                                  {selectedTransaction.onBehalfOf.map((item, index) => (
-                                    <p key={index} className="text-sm flex items-center gap-2">
-                                      <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
-                                      <span className="font-medium">
-                                        {getOnBehalfOfTypeLabel(item.type)}:
-                                      </span>{' '}
-                                      {item.name}
-                                    </p>
-                                  ))}
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Nominal
-                                </Label>
-                                <p className="text-2xl font-bold text-green-600">
-                                  {formatCurrency(selectedTransaction.amount)}
-                                </p>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Tanggal
-                                </Label>
-                                <p className="text-lg font-medium">
-                                  {selectedTransaction.date.toLocaleDateString('id-ID', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                  })}
-                                </p>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Metode Pembayaran
-                                </Label>
-                                <p className="text-lg font-medium">
-                                  {getPaymentMethodLabel(selectedTransaction.paymentMethod)}
-                                </p>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Tipe Zakat
-                                </Label>
-                                <Badge className={getZakatTypeColor(selectedTransaction.zakatType)}>
-                                  {getZakatTypeLabel(selectedTransaction.zakatType)}
-                                </Badge>
-                              </div>
-                            </div>
+                    {/* {selectedTransaction?.id === transaction.id && (
+                      <TransactionDetailDialog
+                        transaction={transaction}
+                        onOpen={() => setSelectedTransaction(transaction)}
+                      />
+                    )} */}
 
-                            {selectedTransaction.notes && (
-                              <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Catatan
-                                </Label>
-                                <div className="bg-gray-50 rounded-lg p-4 border-l-4">
-                                  <p className="text-gray-700">{selectedTransaction.notes}</p>
-                                </div>
-                              </div>
-                            )}
-
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t">
-                              <div className="space-y-3">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Tanda Tangan Pemberi
-                                </Label>
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[200px] flex items-center justify-center">
-                                  {selectedTransaction.donorSignature ? (
-                                    <Image
-                                      src={selectedTransaction.donorSignature}
-                                      alt="Tanda tangan pemberi zakat"
-                                      width={200}
-                                      height={80}
-                                      className="mx-auto h-auto max-h-20 w-auto object-contain"
-                                    />
-                                  ) : (
-                                    <p className="text-gray-400 text-sm">Tidak ada tanda tangan</p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="space-y-3">
-                                <Label className="text-sm font-semibold text-gray-700">
-                                  Tanda Tangan Penerima
-                                </Label>
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[200px] flex items-center justify-center">
-                                  {selectedTransaction.recipientSignature ? (
-                                    <Image
-                                      src={selectedTransaction.recipientSignature}
-                                      alt="Tanda tangan penerima zakat"
-                                      width={200}
-                                      height={80}
-                                      className="mx-auto h-auto max-h-20 w-auto object-contain"
-                                    />
-                                  ) : (
-                                    <p className="text-gray-400 text-sm">Tidak ada tanda tangan</p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </DialogContent>
-                    </Dialog>
+                    <TransactionDetailDialog
+                      transaction={transaction}
+                      onOpen={() => setSelectedTransaction(transaction)}
+                    />
 
                     <Link href={`/dashboard/transactions/edit/${transaction.id}`}>
                       <Button size="sm" variant="outline">
