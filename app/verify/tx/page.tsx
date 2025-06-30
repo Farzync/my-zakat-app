@@ -1,6 +1,9 @@
-import { isTransactionIdValid } from '@/lib/signature'
 import { getTransactionById } from '@/lib/data'
 import VerifyTransactionClient from '@/components/verify-transaction-view'
+
+function isTransactionIdValid(transaction: { id: string } | null, id: string): boolean {
+  return !!transaction && transaction.id === id
+}
 
 export default async function VerifyTransactionPage({
   searchParams,

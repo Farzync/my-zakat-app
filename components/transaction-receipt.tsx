@@ -61,7 +61,7 @@ export async function generateReceiptPDF(transaction: Transaction) {
     styles: { fontSize: 10 },
   })
 
-  const finalY = (doc as any).lastAutoTable?.finalY || 130
+  const finalY = (doc as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY || 130
 
   // 🧾 Footer
   doc.setFontSize(10)

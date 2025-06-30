@@ -17,10 +17,10 @@ export default function QRVerifyPage() {
   const [scanning, setScanning] = useState(true)
   const [redirecting, setRedirecting] = useState(false)
 
-  const handleScan = (detectedCodes: any[]) => {
+  const handleScan = (detectedCodes: unknown[]) => {
     if (!detectedCodes || detectedCodes.length === 0) return
 
-    const result = detectedCodes[0]?.rawValue
+    const result = (detectedCodes as { rawValue?: string }[])[0]?.rawValue
     if (!result) return
 
     try {
@@ -39,7 +39,7 @@ export default function QRVerifyPage() {
       } else {
         setScanError('QR tidak valid: tidak ditemukan ID transaksi.')
       }
-    } catch (err) {
+    } catch {
       setScanError('Format QR tidak valid atau bukan dari struk resmi.')
     }
   }

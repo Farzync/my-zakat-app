@@ -25,13 +25,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { formatCurrency } from '@/lib/utils'
 import { deleteTransaction, fetchPaginatedTransactions } from '@/lib/actions'
-import {
-  getPaymentMethodLabel,
-  getZakatTypeLabel,
-  getOnBehalfOfTypeLabel,
-  ZakatType,
-  type Transaction,
-} from '@/lib/data'
+import { getPaymentMethodLabel, getZakatTypeLabel, ZakatType, type Transaction } from '@/lib/data'
 
 import { Edit, Trash2, Search, Plus } from 'lucide-react'
 import Link from 'next/link'
@@ -47,7 +41,6 @@ export function TransactionList() {
   // State
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('all')
@@ -248,10 +241,7 @@ export function TransactionList() {
                       />
                     )} */}
 
-                    <TransactionDetailDialog
-                      transaction={transaction}
-                      onOpen={() => setSelectedTransaction(transaction)}
-                    />
+                    <TransactionDetailDialog transaction={transaction} onOpen={() => {}} />
 
                     <Link href={`/dashboard/transactions/edit/${transaction.id}`}>
                       <Button size="sm" variant="outline">
