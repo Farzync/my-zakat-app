@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs"
-import { prisma } from "@/lib/prisma"
+import bcrypt from 'bcryptjs'
+import { prisma } from '@/lib/prisma'
 
 export async function getUserByCredentials(username: string, password: string) {
   const user = await prisma.user.findUnique({

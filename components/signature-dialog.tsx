@@ -1,12 +1,18 @@
-"use client"
+'use client'
 
-import type React from "react"
-import { useRef, useState, useEffect, useCallback } from "react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Separator } from "@/components/ui/separator"
-import { Trash2, Pen, Save } from "lucide-react"
-import { useTheme } from "next-themes"
+import type React from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Separator } from '@/components/ui/separator'
+import { Trash2, Pen, Save } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 interface Point {
   x: number
@@ -21,12 +27,12 @@ interface SignatureDialogProps {
   existingSignature?: string
 }
 
-export function SignatureDialog({ 
-  open, 
-  onOpenChange, 
-  onSave, 
+export function SignatureDialog({
+  open,
+  onOpenChange,
+  onSave,
   title,
-  existingSignature 
+  existingSignature,
 }: SignatureDialogProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
@@ -37,7 +43,7 @@ export function SignatureDialog({
   const getCanvasContext = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return null
-    return canvas.getContext("2d")
+    return canvas.getContext('2d')
   }, [])
 
   const setupCanvas = useCallback(() => {
@@ -53,23 +59,23 @@ export function SignatureDialog({
     canvas.height = rect.height * dpr
 
     ctx.scale(dpr, dpr)
-    canvas.style.width = rect.width + "px"
-    canvas.style.height = rect.height + "px"
+    canvas.style.width = rect.width + 'px'
+    canvas.style.height = rect.height + 'px'
 
     // Set drawing styles
-    ctx.strokeStyle = resolvedTheme === "dark" ? "#ffffff" : "#000000"
+    ctx.strokeStyle = resolvedTheme === 'dark' ? '#ffffff' : '#000000'
     ctx.lineWidth = 2
-    ctx.lineCap = "round"
-    ctx.lineJoin = "round"
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
 
     // Fill with transparent background
-    ctx.fillStyle = "transparent"
+    ctx.fillStyle = 'transparent'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
   }, [getCanvasContext, resolvedTheme])
 
   const loadExistingSignature = useCallback(() => {
     if (!existingSignature || !open) return
-    
+
     const canvas = canvasRef.current
     const ctx = getCanvasContext()
     if (!canvas || !ctx) return
@@ -77,7 +83,13 @@ export function SignatureDialog({
     const img = new Image()
     img.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(img, 0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio)
+      ctx.drawImage(
+        img,
+        0,
+        0,
+        canvas.width / window.devicePixelRatio,
+        canvas.height / window.devicePixelRatio
+      )
       setIsEmpty(false)
     }
     img.src = existingSignature
@@ -98,8 +110,8 @@ export function SignatureDialog({
     if (!canvas) return { x: 0, y: 0 }
 
     const rect = canvas.getBoundingClientRect()
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
 
     return {
       x: clientX - rect.left,
@@ -151,22 +163,22 @@ export function SignatureDialog({
     if (!canvas || isEmpty) return
 
     // Create a new canvas with white background for better visibility
-    const exportCanvas = document.createElement("canvas")
-    const exportCtx = exportCanvas.getContext("2d")
+    const exportCanvas = document.createElement('canvas')
+    const exportCtx = exportCanvas.getContext('2d')
     if (!exportCtx) return
 
     exportCanvas.width = canvas.width
     exportCanvas.height = canvas.height
 
     // Fill with white background
-    exportCtx.fillStyle = "#ffffff"
+    exportCtx.fillStyle = '#ffffff'
     exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height)
 
     // Draw the signature on white background
     exportCtx.drawImage(canvas, 0, 0)
 
     // Get the data URL and save
-    const signatureData = exportCanvas.toDataURL("image/png")
+    const signatureData = exportCanvas.toDataURL('image/png')
     onSave(signatureData)
   }
 
@@ -211,10 +223,10 @@ export function SignatureDialog({
           <Separator />
 
           <div className="flex justify-center">
-            <Button 
-              variant="outline" 
-              onClick={clearCanvas} 
-              disabled={isEmpty} 
+            <Button
+              variant="outline"
+              onClick={clearCanvas}
+              disabled={isEmpty}
               className="flex items-center gap-2"
             >
               <Trash2 className="h-4 w-4" />

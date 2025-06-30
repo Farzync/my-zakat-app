@@ -1,30 +1,30 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from '@/lib/prisma'
 
 // Enums to match Prisma schema
 export enum ZakatType {
-  FITRAH = "FITRAH",
-  MAL = "MAL",
-  INFAK = "INFAK",
-  OTHER = "OTHER"
+  FITRAH = 'FITRAH',
+  MAL = 'MAL',
+  INFAK = 'INFAK',
+  OTHER = 'OTHER',
 }
 
 export enum OnBehalfOfType {
-  SELF = "SELF",
-  FAMILY = "FAMILY",
-  BADAL = "BADAL",
-  OTHER = "OTHER"
+  SELF = 'SELF',
+  FAMILY = 'FAMILY',
+  BADAL = 'BADAL',
+  OTHER = 'OTHER',
 }
 
 export enum UserRole {
-  ADMIN = "ADMIN",
-  STAFF = "STAFF"
+  ADMIN = 'ADMIN',
+  STAFF = 'STAFF',
 }
 
 export enum PaymentMethod {
-  CASH = "CASH",
-  BANK_TRANSFER = "BANK_TRANSFER",
-  E_WALLET = "E_WALLET",
-  OTHER = "OTHER"
+  CASH = 'CASH',
+  BANK_TRANSFER = 'BANK_TRANSFER',
+  E_WALLET = 'E_WALLET',
+  OTHER = 'OTHER',
 }
 
 // Updated interfaces to match Prisma models
@@ -81,13 +81,13 @@ export async function getAllTransactions(): Promise<Transaction[]> {
           id: true,
           username: true,
           name: true,
-          role: true
-        }
-      }
+          role: true,
+        },
+      },
     },
     orderBy: {
-      date: 'desc'
-    }
+      date: 'desc',
+    },
   })
 
   return transactions.map(transaction => ({
@@ -98,21 +98,24 @@ export async function getAllTransactions(): Promise<Transaction[]> {
     onBehalfOf: transaction.onBehalfOf.map(behalf => ({
       id: behalf.id,
       type: behalf.type as OnBehalfOfType,
-      name: behalf.name
+      name: behalf.name,
     })),
     user: transaction.user
       ? {
           ...transaction.user,
-          role: transaction.user.role as UserRole
+          role: transaction.user.role as UserRole,
         }
-      : undefined
+      : undefined,
   }))
 }
 
-export async function getPaginatedTransactions(page = 1, limit = 10): Promise<{
-  transactions: Transaction[];
-  totalPages: number;
-  totalItems: number;
+export async function getPaginatedTransactions(
+  page = 1,
+  limit = 10
+): Promise<{
+  transactions: Transaction[]
+  totalPages: number
+  totalItems: number
 }> {
   const [transactions, totalItems] = await Promise.all([
     prisma.transaction.findMany({
@@ -123,17 +126,17 @@ export async function getPaginatedTransactions(page = 1, limit = 10): Promise<{
             id: true,
             username: true,
             name: true,
-            role: true
-          }
-        }
+            role: true,
+          },
+        },
       },
       orderBy: {
-        date: 'desc'
+        date: 'desc',
       },
       skip: (page - 1) * limit,
-      take: limit
+      take: limit,
     }),
-    prisma.transaction.count()
+    prisma.transaction.count(),
   ])
 
   const totalPages = Math.ceil(totalItems / limit)
@@ -147,17 +150,17 @@ export async function getPaginatedTransactions(page = 1, limit = 10): Promise<{
       onBehalfOf: transaction.onBehalfOf.map(behalf => ({
         id: behalf.id,
         type: behalf.type as OnBehalfOfType,
-        name: behalf.name
+        name: behalf.name,
       })),
       user: transaction.user
         ? {
             ...transaction.user,
-            role: transaction.user.role as UserRole
+            role: transaction.user.role as UserRole,
           }
-        : undefined
+        : undefined,
     })),
     totalPages,
-    totalItems
+    totalItems,
   }
 }
 
@@ -171,10 +174,10 @@ export async function getTransactionById(id: string): Promise<Transaction | null
           id: true,
           username: true,
           name: true,
-          role: true
-        }
-      }
-    }
+          role: true,
+        },
+      },
+    },
   })
 
   if (!transaction) return null
@@ -187,14 +190,14 @@ export async function getTransactionById(id: string): Promise<Transaction | null
     onBehalfOf: transaction.onBehalfOf.map(behalf => ({
       id: behalf.id,
       type: behalf.type as OnBehalfOfType,
-      name: behalf.name
+      name: behalf.name,
     })),
     user: transaction.user
       ? {
           ...transaction.user,
-          role: transaction.user.role as UserRole
+          role: transaction.user.role as UserRole,
         }
-      : undefined
+      : undefined,
   }
 }
 
@@ -229,9 +232,9 @@ export async function createTransaction(data: {
       onBehalfOf: {
         create: data.onBehalfOf.map(behalf => ({
           type: behalf.type,
-          name: behalf.name
-        }))
-      }
+          name: behalf.name,
+        })),
+      },
     },
     include: {
       onBehalfOf: true,
@@ -240,10 +243,10 @@ export async function createTransaction(data: {
           id: true,
           username: true,
           name: true,
-          role: true
-        }
-      }
-    }
+          role: true,
+        },
+      },
+    },
   })
 
   return {
@@ -254,37 +257,40 @@ export async function createTransaction(data: {
     onBehalfOf: transaction.onBehalfOf.map(behalf => ({
       id: behalf.id,
       type: behalf.type as OnBehalfOfType,
-      name: behalf.name
+      name: behalf.name,
     })),
     user: transaction.user
       ? {
           ...transaction.user,
-          role: transaction.user.role as UserRole
+          role: transaction.user.role as UserRole,
         }
-      : undefined
+      : undefined,
   }
 }
 
-export async function updateTransaction(id: string, data: {
-  donorName?: string
-  recipientName?: string
-  onBehalfOf?: Array<{
-    type: OnBehalfOfType
-    name: string
-  }>
-  amount?: number
-  date?: Date
-  paymentMethod?: PaymentMethod
-  zakatType?: ZakatType
-  notes?: string
-  donorSignature?: string
-  recipientSignature?: string
-}): Promise<Transaction | null> {
+export async function updateTransaction(
+  id: string,
+  data: {
+    donorName?: string
+    recipientName?: string
+    onBehalfOf?: Array<{
+      type: OnBehalfOfType
+      name: string
+    }>
+    amount?: number
+    date?: Date
+    paymentMethod?: PaymentMethod
+    zakatType?: ZakatType
+    notes?: string
+    donorSignature?: string
+    recipientSignature?: string
+  }
+): Promise<Transaction | null> {
   // If onBehalfOf is being updated, we need to handle it separately
   if (data.onBehalfOf) {
     // Delete existing onBehalfOf records
     await prisma.onBehalfOf.deleteMany({
-      where: { transactionId: id }
+      where: { transactionId: id },
     })
   }
 
@@ -304,10 +310,10 @@ export async function updateTransaction(id: string, data: {
         onBehalfOf: {
           create: data.onBehalfOf.map(behalf => ({
             type: behalf.type,
-            name: behalf.name
-          }))
-        }
-      })
+            name: behalf.name,
+          })),
+        },
+      }),
     },
     include: {
       onBehalfOf: true,
@@ -316,10 +322,10 @@ export async function updateTransaction(id: string, data: {
           id: true,
           username: true,
           name: true,
-          role: true
-        }
-      }
-    }
+          role: true,
+        },
+      },
+    },
   })
 
   return {
@@ -330,14 +336,14 @@ export async function updateTransaction(id: string, data: {
     onBehalfOf: transaction.onBehalfOf.map(behalf => ({
       id: behalf.id,
       type: behalf.type as OnBehalfOfType,
-      name: behalf.name
+      name: behalf.name,
     })),
     user: transaction.user
       ? {
           ...transaction.user,
-          role: transaction.user.role as UserRole
+          role: transaction.user.role as UserRole,
         }
-      : undefined
+      : undefined,
   }
 }
 
@@ -345,14 +351,14 @@ export async function deleteTransaction(id: string): Promise<boolean> {
   try {
     // Delete onBehalfOf records first (due to foreign key constraint)
     await prisma.onBehalfOf.deleteMany({
-      where: { transactionId: id }
+      where: { transactionId: id },
     })
-    
+
     // Delete the transaction
     await prisma.transaction.delete({
-      where: { id }
+      where: { id },
     })
-    
+
     return true
   } catch (error) {
     console.error('Error deleting transaction:', error)
@@ -366,12 +372,12 @@ export async function getTransactionStats() {
     prisma.transaction.groupBy({
       by: ['zakatType'],
       _sum: {
-        amount: true
+        amount: true,
       },
       _count: {
-        zakatType: true
-      }
-    })
+        zakatType: true,
+      },
+    }),
   ])
 
   const stats = {
@@ -384,7 +390,7 @@ export async function getTransactionStats() {
     other: 0,
     otherCount: 0,
     total: 0,
-    totalCount: transactions
+    totalCount: transactions,
   }
 
   let total = 0
@@ -425,14 +431,14 @@ export async function getRecentTransactions(limit = 5): Promise<Transaction[]> {
           id: true,
           username: true,
           name: true,
-          role: true
-        }
-      }
+          role: true,
+        },
+      },
     },
     orderBy: {
-      date: 'desc'
+      date: 'desc',
     },
-    take: limit
+    take: limit,
   })
 
   return transactions.map(transaction => ({
@@ -443,68 +449,70 @@ export async function getRecentTransactions(limit = 5): Promise<Transaction[]> {
     onBehalfOf: transaction.onBehalfOf.map(behalf => ({
       id: behalf.id,
       type: behalf.type as OnBehalfOfType,
-      name: behalf.name
+      name: behalf.name,
     })),
     user: transaction.user
       ? {
           ...transaction.user,
-          role: transaction.user.role as UserRole
+          role: transaction.user.role as UserRole,
         }
-      : undefined
+      : undefined,
   }))
 }
 
 // Report functions
-function getPeriodKey(date: Date, period: "daily" | "weekly" | "monthly" | "yearly") {
+function getPeriodKey(date: Date, period: 'daily' | 'weekly' | 'monthly' | 'yearly') {
   const year = date.getFullYear()
   const month = date.getMonth()
   const day = date.getDate()
   switch (period) {
-    case "daily":
+    case 'daily':
       return `${year}-${month + 1}-${day}`
-    case "weekly": {
+    case 'weekly': {
       // Week number of year
       const firstDay = new Date(date.getFullYear(), 0, 1)
       const days = Math.floor((date.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000))
       const week = Math.ceil((days + firstDay.getDay() + 1) / 7)
       return `${year}-W${week}`
     }
-    case "monthly":
+    case 'monthly':
       return `${year}-${month + 1}`
-    case "yearly":
+    case 'yearly':
       return `${year}`
     default:
-      return ""
+      return ''
   }
 }
 
-function getPeriodLabel(date: Date, period: "daily" | "weekly" | "monthly" | "yearly") {
+function getPeriodLabel(date: Date, period: 'daily' | 'weekly' | 'monthly' | 'yearly') {
   switch (period) {
-    case "daily":
-      return date.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })
-    case "weekly": {
+    case 'daily':
+      return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+    case 'weekly': {
       // Week number of year
       const firstDay = new Date(date.getFullYear(), 0, 1)
       const days = Math.floor((date.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000))
       const week = Math.ceil((days + firstDay.getDay() + 1) / 7)
       return `Minggu ${week} ${date.getFullYear()}`
     }
-    case "monthly":
-      return date.toLocaleDateString("id-ID", { month: "long", year: "numeric" })
-    case "yearly":
+    case 'monthly':
+      return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+    case 'yearly':
       return `${date.getFullYear()}`
     default:
-      return ""
+      return ''
   }
 }
 
-export async function getReportData(period: "daily" | "weekly" | "monthly" | "yearly"): Promise<ReportData[]> {
+export async function getReportData(
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly'
+): Promise<ReportData[]> {
   const transactions = await prisma.transaction.findMany({
     select: {
       amount: true,
       date: true,
-      zakatType: true
-    }
+      zakatType: true,
+    },
   })
 
   const grouped: Record<string, ReportData> = {}
@@ -513,7 +521,7 @@ export async function getReportData(period: "daily" | "weekly" | "monthly" | "ye
     const date = new Date(t.date)
     const key = getPeriodKey(date, period)
     const label = getPeriodLabel(date, period)
-    
+
     if (!grouped[key]) {
       grouped[key] = {
         period: label,
@@ -527,7 +535,7 @@ export async function getReportData(period: "daily" | "weekly" | "monthly" | "ye
     }
 
     const amount = Number(t.amount)
-    
+
     switch (t.zakatType) {
       case ZakatType.FITRAH:
         grouped[key].fitrah += amount
@@ -541,7 +549,7 @@ export async function getReportData(period: "daily" | "weekly" | "monthly" | "ye
       default:
         grouped[key].other += amount
     }
-    
+
     grouped[key].total += amount
     grouped[key].transactionCount += 1
   }
@@ -559,9 +567,9 @@ export async function getReportData(period: "daily" | "weekly" | "monthly" | "ye
 }
 
 export async function getFilteredReportData(
-  period: "daily" | "weekly" | "monthly" | "yearly",
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly',
   startDate?: string,
-  endDate?: string,
+  endDate?: string
 ): Promise<ReportData[]> {
   // Build where clause for date filtering
   const whereClause: any = {}
@@ -576,8 +584,8 @@ export async function getFilteredReportData(
     select: {
       amount: true,
       date: true,
-      zakatType: true
-    }
+      zakatType: true,
+    },
   })
 
   const grouped: Record<string, ReportData> = {}
@@ -586,7 +594,7 @@ export async function getFilteredReportData(
     const date = new Date(t.date)
     const key = getPeriodKey(date, period)
     const label = getPeriodLabel(date, period)
-    
+
     if (!grouped[key]) {
       grouped[key] = {
         period: label,
@@ -600,7 +608,7 @@ export async function getFilteredReportData(
     }
 
     const amount = Number(t.amount)
-    
+
     switch (t.zakatType) {
       case ZakatType.FITRAH:
         grouped[key].fitrah += amount
@@ -614,7 +622,7 @@ export async function getFilteredReportData(
       default:
         grouped[key].other += amount
     }
-    
+
     grouped[key].total += amount
     grouped[key].transactionCount += 1
   }
@@ -633,7 +641,7 @@ export async function getFilteredReportData(
 // Chart data functions
 export async function getChartData() {
   const aggregations = await prisma.transaction.groupBy({
-    by: ["zakatType"],
+    by: ['zakatType'],
     _sum: {
       amount: true,
     },
@@ -669,44 +677,52 @@ export async function getChartData() {
 
 // User functions
 export async function getAllUsers(): Promise<User[]> {
-  return await prisma.user.findMany({
-    select: {
-      id: true,
-      username: true,
-      password: true,
-      name: true,
-      role: true
-    }
-  }).then(users => users.map(user => ({
-    ...user,
-    role: user.role as UserRole
-  })))
+  return await prisma.user
+    .findMany({
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        name: true,
+        role: true,
+      },
+    })
+    .then(users =>
+      users.map(user => ({
+        ...user,
+        role: user.role as UserRole,
+      }))
+    )
 }
 
 export async function getUserById(id: string): Promise<User | null> {
-  return await prisma.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      username: true,
-      password: true,
-      name: true,
-      role: true
-    }
-  }).then(user => user ? { ...user, role: user.role as UserRole } : null)
+  return await prisma.user
+    .findUnique({
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        name: true,
+        role: true,
+      },
+    })
+    .then(user => (user ? { ...user, role: user.role as UserRole } : null))
 }
 
 export async function getUserByUsername(username: string): Promise<User | null> {
-  return await prisma.user.findUnique({
-    where: { username },
-    select: {
-      id: true,
-      username: true,
-      password: true,
-      name: true,
-      role: true
-    }
-  }).then(user => user ? { ...user, role: user.role as UserRole } : null)
+  return await prisma.user
+    .findUnique({
+      where: { username },
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        name: true,
+        role: true,
+      },
+    })
+    .then(user => (user ? { ...user, role: user.role as UserRole } : null))
 }
 
 export async function createUser(data: {
@@ -715,41 +731,48 @@ export async function createUser(data: {
   name: string
   role: UserRole
 }): Promise<User> {
-  return await prisma.user.create({
-    data,
-    select: {
-      id: true,
-      username: true,
-      password: true,
-      name: true,
-      role: true
-    }
-  }).then(user => ({ ...user, role: user.role as UserRole }))
+  return await prisma.user
+    .create({
+      data,
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        name: true,
+        role: true,
+      },
+    })
+    .then(user => ({ ...user, role: user.role as UserRole }))
 }
 
-export async function updateUser(id: string, data: {
-  username?: string
-  password?: string
-  name?: string
-  role?: UserRole
-}): Promise<User | null> {
-  return await prisma.user.update({
-    where: { id },
-    data,
-    select: {
-      id: true,
-      username: true,
-      password: true,
-      name: true,
-      role: true
-    }
-  }).then(user => ({ ...user, role: user.role as UserRole }))
+export async function updateUser(
+  id: string,
+  data: {
+    username?: string
+    password?: string
+    name?: string
+    role?: UserRole
+  }
+): Promise<User | null> {
+  return await prisma.user
+    .update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        name: true,
+        role: true,
+      },
+    })
+    .then(user => ({ ...user, role: user.role as UserRole }))
 }
 
 export async function deleteUser(id: string): Promise<boolean> {
   try {
     await prisma.user.delete({
-      where: { id }
+      where: { id },
     })
     return true
   } catch (error) {
@@ -761,38 +784,38 @@ export async function deleteUser(id: string): Promise<boolean> {
 // Helper functions for UI labels
 export function getPaymentMethodLabel(method: PaymentMethod): string {
   const labels: Record<PaymentMethod, string> = {
-    [PaymentMethod.CASH]: "Cash",
-    [PaymentMethod.BANK_TRANSFER]: "Bank Transfer",
-    [PaymentMethod.E_WALLET]: "E-Wallet",
-    [PaymentMethod.OTHER]: "Lainnya",
+    [PaymentMethod.CASH]: 'Cash',
+    [PaymentMethod.BANK_TRANSFER]: 'Bank Transfer',
+    [PaymentMethod.E_WALLET]: 'E-Wallet',
+    [PaymentMethod.OTHER]: 'Lainnya',
   }
   return labels[method] || method
 }
 
 export function getZakatTypeLabel(type: ZakatType): string {
   const labels: Record<ZakatType, string> = {
-    [ZakatType.FITRAH]: "Fitrah",
-    [ZakatType.MAL]: "Mal",
-    [ZakatType.INFAK]: "Infak",
-    [ZakatType.OTHER]: "Lainnya",
+    [ZakatType.FITRAH]: 'Fitrah',
+    [ZakatType.MAL]: 'Mal',
+    [ZakatType.INFAK]: 'Infak',
+    [ZakatType.OTHER]: 'Lainnya',
   }
   return labels[type] || type
 }
 
 export function getOnBehalfOfTypeLabel(type: OnBehalfOfType): string {
   const labels: Record<OnBehalfOfType, string> = {
-    [OnBehalfOfType.SELF]: "Diri sendiri",
-    [OnBehalfOfType.FAMILY]: "Keluarga",
-    [OnBehalfOfType.BADAL]: "Badal",
-    [OnBehalfOfType.OTHER]: "Lainnya",
+    [OnBehalfOfType.SELF]: 'Diri sendiri',
+    [OnBehalfOfType.FAMILY]: 'Keluarga',
+    [OnBehalfOfType.BADAL]: 'Badal',
+    [OnBehalfOfType.OTHER]: 'Lainnya',
   }
   return labels[type] || type
 }
 
 export function getUserRoleLabel(role: UserRole): string {
   const labels: Record<UserRole, string> = {
-    [UserRole.ADMIN]: "Admin",
-    [UserRole.STAFF]: "Staff",
+    [UserRole.ADMIN]: 'Admin',
+    [UserRole.STAFF]: 'Staff',
   }
   return labels[role] || role
 }

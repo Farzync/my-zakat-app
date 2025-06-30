@@ -1,15 +1,26 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
-import { logout } from "@/lib/actions"
-import { LayoutDashboard, Plus, List, BarChart3, FileText, Users, Menu, LogOut, User, HandCoins } from "lucide-react"
+import { useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
+import { logout } from '@/lib/actions'
+import {
+  LayoutDashboard,
+  Plus,
+  List,
+  BarChart3,
+  FileText,
+  Users,
+  Menu,
+  LogOut,
+  User,
+  HandCoins,
+} from 'lucide-react'
 
 interface ResponsiveSidebarProps {
   children: React.ReactNode
@@ -20,18 +31,18 @@ interface ResponsiveSidebarProps {
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Tambah Transaksi", href: "/dashboard/transactions/new", icon: Plus },
-  { name: "Daftar Transaksi", href: "/dashboard/transactions", icon: List },
-  { name: "Laporan Transaksi", href: "/dashboard/reports", icon: BarChart3 },
-  { name: "Export Transaksi", href: "/dashboard/export", icon: FileText },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Tambah Transaksi', href: '/dashboard/transactions/new', icon: Plus },
+  { name: 'Daftar Transaksi', href: '/dashboard/transactions', icon: List },
+  { name: 'Laporan Transaksi', href: '/dashboard/reports', icon: BarChart3 },
+  { name: 'Export Transaksi', href: '/dashboard/export', icon: FileText },
 ]
 
-const adminNavigation = [{ name: "Kelola Pengguna", href: "/dashboard/users", icon: Users }]
+const adminNavigation = [{ name: 'Kelola Pengguna', href: '/dashboard/users', icon: Users }]
 
 function SidebarContent({ userRole, onItemClick }: { userRole: string; onItemClick?: () => void }) {
   const pathname = usePathname()
-  const allNavigation = userRole === "ADMIN" ? [...navigation, ...adminNavigation] : navigation
+  const allNavigation = userRole === 'ADMIN' ? [...navigation, ...adminNavigation] : navigation
 
   return (
     <div className="flex flex-col h-full">
@@ -44,23 +55,22 @@ function SidebarContent({ userRole, onItemClick }: { userRole: string; onItemCli
 
       <nav className="flex-1 p-4">
         <div className="space-y-2">
-          {allNavigation.map((item) => {
+          {allNavigation.map(item => {
             const Icon = item.icon
             const isActive = (() => {
-              if (item.href === "/dashboard") {
-                return pathname === "/dashboard"
+              if (item.href === '/dashboard') {
+                return pathname === '/dashboard'
               }
 
-              if (item.href === "/dashboard/transactions") {
+              if (item.href === '/dashboard/transactions') {
                 return (
-                  pathname === "/dashboard/transactions" ||
-                  pathname.startsWith("/dashboard/transactions/edit")
+                  pathname === '/dashboard/transactions' ||
+                  pathname.startsWith('/dashboard/transactions/edit')
                 )
               }
 
               return pathname === item.href
             })()
-
 
             return (
               <Link
@@ -68,8 +78,10 @@ function SidebarContent({ userRole, onItemClick }: { userRole: string; onItemCli
                 href={item.href}
                 onClick={onItemClick}
                 className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                  isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                  'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                  isActive
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 )}
               >
                 <Icon className="mr-3 h-5 w-5" />

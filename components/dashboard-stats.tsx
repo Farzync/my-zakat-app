@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getTransactionStats } from "@/lib/data"
-import { formatCurrency } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getTransactionStats } from '@/lib/data'
+import { formatCurrency } from '@/lib/utils'
 
 export async function DashboardStats() {
   const stats = await getTransactionStats()

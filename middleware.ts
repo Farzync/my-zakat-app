@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
-import { verifySession } from "@/lib/auth"
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { verifySession } from '@/lib/auth'
 
 export async function middleware(request: NextRequest) {
   // Cek jika path diawali dengan /dashboard
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (request.nextUrl.pathname.startsWith('/dashboard')) {
     const session = await verifySession()
     if (!session) {
-      const loginUrl = new URL("/login", request.url)
+      const loginUrl = new URL('/login', request.url)
       return NextResponse.redirect(loginUrl)
     }
   }
@@ -16,5 +16,5 @@ export async function middleware(request: NextRequest) {
 
 // Hanya aktif di route dashboard
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ['/dashboard/:path*'],
 }

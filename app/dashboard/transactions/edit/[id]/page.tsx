@@ -1,7 +1,7 @@
-import { verifySession } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { TransactionForm } from "@/components/transaction-form"
-import { getTransactionById } from "@/lib/data"
+import { verifySession } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { TransactionForm } from '@/components/transaction-form'
+import { getTransactionById } from '@/lib/data'
 
 interface EditTransactionPageProps {
   params: {
@@ -13,13 +13,13 @@ export default async function EditTransactionPage({ params }: EditTransactionPag
   const session = await verifySession()
 
   if (!session) {
-    redirect("/login")
+    redirect('/login')
   }
 
   const transaction = await getTransactionById(params.id)
 
   if (!transaction) {
-    redirect("/dashboard/transactions")
+    redirect('/dashboard/transactions')
   }
 
   return (

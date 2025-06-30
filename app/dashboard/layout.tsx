@@ -1,17 +1,13 @@
-import type React from "react"
-import { verifySession } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { ResponsiveSidebar } from "@/components/responsive-sidebar"
+import type React from 'react'
+import { verifySession } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { ResponsiveSidebar } from '@/components/responsive-sidebar'
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await verifySession()
 
   if (!session) {
-    redirect("/login")
+    redirect('/login')
   }
 
   return (

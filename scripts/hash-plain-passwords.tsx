@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 async function hashPlainPasswords() {
   const users = await prisma.user.findMany()
@@ -10,7 +10,7 @@ async function hashPlainPasswords() {
     const currentPassword = user.password
 
     // Cek apakah password masih plaintext (belum di-hash)
-    const isHashed = currentPassword.startsWith("$2b$") || currentPassword.startsWith("$2a$")
+    const isHashed = currentPassword.startsWith('$2b$') || currentPassword.startsWith('$2a$')
     if (isHashed) continue
 
     const hashedPassword = await bcrypt.hash(currentPassword, 10)
@@ -25,15 +25,15 @@ async function hashPlainPasswords() {
   }
 
   if (updated === 0) {
-    console.log("✅ Semua password sudah dalam bentuk hash.")
+    console.log('✅ Semua password sudah dalam bentuk hash.')
   } else {
     console.log(`🎉 Total ${updated} password berhasil di-hash.`)
   }
 }
 
 hashPlainPasswords()
-  .catch((err) => {
-    console.error("❌ Gagal meng-hash password:", err)
+  .catch(err => {
+    console.error('❌ Gagal meng-hash password:', err)
   })
   .finally(async () => {
     await prisma.$disconnect()

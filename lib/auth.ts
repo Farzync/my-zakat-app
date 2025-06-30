@@ -1,21 +1,21 @@
-import { SignJWT, jwtVerify } from "jose"
-import { cookies } from "next/headers"
-import { getUserByCredentials } from "@/lib/user"
+import { SignJWT, jwtVerify } from 'jose'
+import { cookies } from 'next/headers'
+import { getUserByCredentials } from '@/lib/user'
 
-const secretKey = process.env.JWT_SECRET || "your-secret-key"
+const secretKey = process.env.JWT_SECRET || 'your-secret-key'
 const key = new TextEncoder().encode(secretKey)
 
 export async function encrypt(payload: any) {
   return await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime("24h")
+    .setExpirationTime('24h')
     .sign(key)
 }
 
 export async function decrypt(input: string): Promise<any> {
   const { payload } = await jwtVerify(input, key, {
-    algorithms: ["HS256"],
+    algorithms: ['HS256'],
   })
   return payload
 }
@@ -38,12 +38,12 @@ export async function createSession(user: {
   const session = await encrypt({ user }) // simple!
 
   const cookieStore = await cookies()
-  cookieStore.set("session", session, {
+  cookieStore.set('session', session, {
     expires,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
   })
 }
 
@@ -54,7 +54,7 @@ export async function verifySession(): Promise<{
   role: string
 } | null> {
   const cookieStore = await cookies()
-  const cookie = cookieStore.get("session")?.value
+  const cookie = cookieStore.get('session')?.value
 
   if (!cookie) return null
 
@@ -68,5 +68,5 @@ export async function verifySession(): Promise<{
 
 export async function deleteSession() {
   const cookieStore = await cookies()
-  cookieStore.delete("session")
+  cookieStore.delete('session')
 }

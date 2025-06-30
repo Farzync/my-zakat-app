@@ -1,23 +1,26 @@
-"use client"
+'use client'
 
-import type React from "react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { createTransaction, updateTransaction } from "@/lib/actions"
-import { Plus, Minus, Pen } from "lucide-react"
-import { 
-  OnBehalfOfType,
-  type Transaction 
-} from "@/lib/data"
-import toast from "react-hot-toast"
-import { SignatureDialog } from "@/components/signature-dialog"
+import type React from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { createTransaction, updateTransaction } from '@/lib/actions'
+import { Plus, Minus, Pen } from 'lucide-react'
+import { OnBehalfOfType, type Transaction } from '@/lib/data'
+import toast from 'react-hot-toast'
+import { SignatureDialog } from '@/components/signature-dialog'
 
 interface OnBehalfOfItem {
   type: OnBehalfOfType
@@ -31,34 +34,38 @@ interface TransactionFormProps {
 
 export function TransactionForm({ transaction, isEdit = false }: TransactionFormProps) {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
   const [onBehalfOfList, setOnBehalfOfList] = useState<OnBehalfOfItem[]>(
-    transaction?.onBehalfOf || [{ type: OnBehalfOfType.SELF, name: "" }],
+    transaction?.onBehalfOf || [{ type: OnBehalfOfType.SELF, name: '' }]
   )
-  const [donorSignature, setDonorSignature] = useState<string>(transaction?.donorSignature || "")
-  const [recipientSignature, setRecipientSignature] = useState<string>(transaction?.recipientSignature || "")
+  const [donorSignature, setDonorSignature] = useState<string>(transaction?.donorSignature || '')
+  const [recipientSignature, setRecipientSignature] = useState<string>(
+    transaction?.recipientSignature || ''
+  )
   const [isDonorSignatureDialogOpen, setIsDonorSignatureDialogOpen] = useState(false)
   const [isRecipientSignatureDialogOpen, setIsRecipientSignatureDialogOpen] = useState(false)
   const router = useRouter()
 
   const formatCurrency = (value: string) => {
-    const number = value.replace(/\D/g, "")
-    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    const number = value.replace(/\D/g, '')
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
   }
 
-  const initialFormattedAmount = transaction ? "Rp. " + formatCurrency(transaction.amount.toString()) : "Rp. 0";
+  const initialFormattedAmount = transaction
+    ? 'Rp. ' + formatCurrency(transaction.amount.toString())
+    : 'Rp. 0'
 
   const [amount, setAmount] = useState(initialFormattedAmount)
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let raw = e.target.value.replace(/\D/g, "")
-    raw = raw.replace(/^0+(?!$)/, "")
-    const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-    setAmount("Rp. " + formatted)
+    let raw = e.target.value.replace(/\D/g, '')
+    raw = raw.replace(/^0+(?!$)/, '')
+    const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    setAmount('Rp. ' + formatted)
   }
 
   const addOnBehalfOfField = () => {
-    setOnBehalfOfList([...onBehalfOfList, { type: OnBehalfOfType.SELF, name: "" }])
+    setOnBehalfOfList([...onBehalfOfList, { type: OnBehalfOfType.SELF, name: '' }])
   }
 
   const removeOnBehalfOfField = (index: number) => {
@@ -86,11 +93,11 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
-    setError("")
+    setError('')
 
     // Validate signatures
     if (!donorSignature || !recipientSignature) {
-      setError("Tanda tangan pemberi zakat dan penerima harus diisi")
+      setError('Tanda tangan pemberi zakat dan penerima harus diisi')
       setLoading(false)
       return
     }
@@ -99,20 +106,20 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
     const formData = new FormData(form)
 
     // Format ulang amount dan onBehalfOf
-    formData.set("amount", amount.replace(/\./g, "").replace("Rp ", ""))
-    formData.set("onBehalfOf", JSON.stringify(onBehalfOfList.filter((item) => item.name.trim())))
-    formData.set("donorSignature", donorSignature)
-    formData.set("recipientSignature", recipientSignature)
+    formData.set('amount', amount.replace(/\./g, '').replace('Rp ', ''))
+    formData.set('onBehalfOf', JSON.stringify(onBehalfOfList.filter(item => item.name.trim())))
+    formData.set('donorSignature', donorSignature)
+    formData.set('recipientSignature', recipientSignature)
 
     const result = isEdit
       ? await updateTransaction(transaction!.id, formData)
       : await createTransaction(formData)
 
     if (result.success) {
-      toast.success("Transaksi berhasil!")
-      router.push("/dashboard/transactions")
+      toast.success('Transaksi berhasil!')
+      router.push('/dashboard/transactions')
     } else {
-      setError(result.error || `Gagal ${isEdit ? "memperbarui" : "menyimpan"} transaksi`)
+      setError(result.error || `Gagal ${isEdit ? 'memperbarui' : 'menyimpan'} transaksi`)
     }
 
     setLoading(false)
@@ -122,7 +129,9 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
     <div className="max-w-4xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl md:text-2xl">{isEdit ? "Edit Transaksi Zakat Lama" : "Buat Transaksi Zakat Baru"}</CardTitle>
+          <CardTitle className="text-xl md:text-2xl">
+            {isEdit ? 'Edit Transaksi Zakat Lama' : 'Buat Transaksi Zakat Baru'}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -159,7 +168,10 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
               <div className="space-y-3">
                 {onBehalfOfList.map((item, index) => (
                   <div key={index} className="flex flex-col sm:flex-row gap-2">
-                    <Select value={item.type} onValueChange={(value) => updateOnBehalfOfField(index, "type", value)}>
+                    <Select
+                      value={item.type}
+                      onValueChange={value => updateOnBehalfOfField(index, 'type', value)}
+                    >
                       <SelectTrigger className="w-full sm:w-40">
                         <SelectValue placeholder="Pilih atas Nama" />
                       </SelectTrigger>
@@ -173,7 +185,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                     <Input
                       placeholder="Nama/keterangan"
                       value={item.name}
-                      onChange={(e) => updateOnBehalfOfField(index, "name", e.target.value)}
+                      onChange={e => updateOnBehalfOfField(index, 'name', e.target.value)}
                       className="flex-1"
                     />
                     <Button
@@ -220,7 +232,11 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
 
               <div className="space-y-2">
                 <Label htmlFor="paymentMethod">Metode Pembayaran *</Label>
-                <Select name="paymentMethod" required defaultValue={transaction?.paymentMethod ?? undefined}>
+                <Select
+                  name="paymentMethod"
+                  required
+                  defaultValue={transaction?.paymentMethod ?? undefined}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Pilih metode pembayaran" />
                   </SelectTrigger>
@@ -261,13 +277,13 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                     className="w-full flex items-center gap-2"
                   >
                     <Pen className="h-4 w-4" />
-                    {donorSignature ? "Edit Tanda Tangan" : "Buat Tanda Tangan"}
+                    {donorSignature ? 'Edit Tanda Tangan' : 'Buat Tanda Tangan'}
                   </Button>
                   {donorSignature && (
                     <div className="border rounded-lg p-2">
-                      <img 
-                        src={donorSignature} 
-                        alt="Tanda tangan pemberi zakat" 
+                      <img
+                        src={donorSignature}
+                        alt="Tanda tangan pemberi zakat"
                         className="max-h-20 mx-auto"
                       />
                     </div>
@@ -285,13 +301,13 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                     className="w-full flex items-center gap-2"
                   >
                     <Pen className="h-4 w-4" />
-                    {recipientSignature ? "Edit Tanda Tangan" : "Buat Tanda Tangan"}
+                    {recipientSignature ? 'Edit Tanda Tangan' : 'Buat Tanda Tangan'}
                   </Button>
                   {recipientSignature && (
                     <div className="border rounded-lg p-2">
-                      <img 
-                        src={recipientSignature} 
-                        alt="Tanda tangan penerima" 
+                      <img
+                        src={recipientSignature}
+                        alt="Tanda tangan penerima"
                         className="max-h-20 mx-auto"
                       />
                     </div>
@@ -320,9 +336,14 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button type="submit" disabled={loading} className="flex-1 sm:flex-none">
-                {loading ? "Memproses..." : isEdit ? "Update Transaksi" : "Simpan Transaksi"}
+                {loading ? 'Memproses...' : isEdit ? 'Update Transaksi' : 'Simpan Transaksi'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1 sm:flex-none">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                className="flex-1 sm:flex-none"
+              >
                 Batal
               </Button>
             </div>

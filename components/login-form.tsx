@@ -1,31 +1,31 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { login } from "@/lib/actions"
-import { Loader2 } from "lucide-react"
-import { toast } from "react-hot-toast"
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { login } from '@/lib/actions'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 export function LoginForm() {
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
-    setError("")
+    setError('')
 
     const result = await login(formData)
 
     if (result.success) {
-      toast.success("Login berhasil!")
-      router.push("/dashboard")
+      toast.success('Login berhasil!')
+      router.push('/dashboard')
     } else {
-      setError(result.error || "Login gagal")
+      setError(result.error || 'Login gagal')
     }
 
     setLoading(false)
@@ -38,18 +38,15 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <form
-          onSubmit={async (e) => {
+          onSubmit={async e => {
             e.preventDefault()
             const formData = new FormData(e.currentTarget)
             await handleSubmit(formData)
           }}
-          className={`space-y-4 ${loading ? "pointer-events-none opacity-60" : ""}`}
+          className={`space-y-4 ${loading ? 'pointer-events-none opacity-60' : ''}`}
         >
-          
           {error && (
-            <div className="rounded-md bg-red-600 text-white p-4 text-sm font-medium">
-              {error}
-            </div>
+            <div className="rounded-md bg-red-600 text-white p-4 text-sm font-medium">{error}</div>
           )}
 
           <div className="space-y-2">
@@ -82,7 +79,7 @@ export function LoginForm() {
             disabled={loading}
           >
             {loading && <Loader2 className="animate-spin h-4 w-4" />}
-            {loading ? "Memproses..." : "Login"}
+            {loading ? 'Memproses...' : 'Login'}
           </Button>
         </form>
 

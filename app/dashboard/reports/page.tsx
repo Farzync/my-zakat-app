@@ -1,12 +1,12 @@
-import { verifySession } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { ReportsView } from "@/components/reports-view"
+import { verifySession } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { ReportsView } from '@/components/reports-view'
 
 export default async function ReportsPage() {
   const session = await verifySession()
 
   if (!session) {
-    redirect("/login")
+    redirect('/login')
   }
 
   return (

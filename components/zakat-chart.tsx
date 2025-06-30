@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getChartData } from "@/lib/data"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getChartData } from '@/lib/data'
 
 interface ChartData {
   name: string
@@ -16,10 +16,10 @@ interface RawChartData {
 
 function formatChartData(data: RawChartData): ChartData[] {
   return [
-    { name: "Fitrah", value: data.fitrah, color: "#3b82f6" },
-    { name: "Mal", value: data.mal, color: "#10b981" },
-    { name: "Infak", value: data.infak, color: "#f59e0b" },
-    { name: "Lainnya", value: data.other, color: "#ef4444" },
+    { name: 'Fitrah', value: data.fitrah, color: '#3b82f6' },
+    { name: 'Mal', value: data.mal, color: '#10b981' },
+    { name: 'Infak', value: data.infak, color: '#f59e0b' },
+    { name: 'Lainnya', value: data.other, color: '#ef4444' },
   ]
 }
 
@@ -35,7 +35,7 @@ export default async function ZakatChart() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {data.map((item) => {
+          {data.map(item => {
             const percentage = total > 0 ? (item.value / total) * 100 : 0
             return (
               <div key={item.name} className="space-y-2">

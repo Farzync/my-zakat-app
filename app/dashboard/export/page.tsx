@@ -1,12 +1,12 @@
-import { verifySession } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { ExportForm } from "@/components/export-form"
+import { verifySession } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { ExportForm } from '@/components/export-form'
 
 export default async function ExportPage() {
   const session = await verifySession()
 
   if (!session) {
-    redirect("/login")
+    redirect('/login')
   }
 
   return (
