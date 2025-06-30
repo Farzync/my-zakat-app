@@ -5,7 +5,18 @@ import { getUserByCredentials } from '@/lib/user'
 const secretKey = process.env.JWT_SECRET || 'your-secret-key'
 const key = new TextEncoder().encode(secretKey)
 
-export async function encrypt(payload: any) {
+type UserSession = {
+  id: string
+  username: string
+  name: string
+  role: string
+}
+
+type SessionPayload = {
+  user: UserSession
+}
+
+export async function encrypt(payload: SessionPayload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -13,11 +24,11 @@ export async function encrypt(payload: any) {
     .sign(key)
 }
 
-export async function decrypt(input: string): Promise<any> {
+export async function decrypt(input: string): Promise<SessionPayload> {
   const { payload } = await jwtVerify(input, key, {
     algorithms: ['HS256'],
   })
-  return payload
+  return payload as SessionPayload
 }
 
 export async function authenticateUser(username: string, password: string) {
@@ -28,14 +39,9 @@ export async function authenticateUser(username: string, password: string) {
   return { id, username: uname, name, role }
 }
 
-export async function createSession(user: {
-  id: string
-  username: string
-  name: string
-  role: string
-}) {
+export async function createSession(user: UserSession) {
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 jam
-  const session = await encrypt({ user }) // simple!
+  const session = await encrypt({ user })
 
   const cookieStore = await cookies()
   cookieStore.set('session', session, {
@@ -47,12 +53,7 @@ export async function createSession(user: {
   })
 }
 
-export async function verifySession(): Promise<{
-  id: string
-  username: string
-  name: string
-  role: string
-} | null> {
+export async function verifySession(): Promise<UserSession | null> {
   const cookieStore = await cookies()
   const cookie = cookieStore.get('session')?.value
 

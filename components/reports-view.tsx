@@ -38,22 +38,6 @@ export function ReportsView() {
 
   const totalPages = Math.ceil(reportData.length / rowsPerPage)
 
-  const generateReport = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await generateReportAction({ period, startDate, endDate })
-      setReportData(sortData(data))
-    } catch (error) {
-      console.error('Error generating report:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [period, startDate, endDate, sortOrder, sortKey])
-
-  useEffect(() => {
-    generateReport()
-  }, [generateReport])
-
   const totalAll = reportData.reduce((sum, item) => sum + item.total, 0)
   const totalTransactions = reportData.reduce((sum, item) => sum + item.transactionCount, 0)
   const averagePerTransaction = totalTransactions > 0 ? totalAll / totalTransactions : 0
@@ -257,26 +241,45 @@ export function ReportsView() {
     return new Date(Number(tahun), bulanMap[bulan])
   }
 
-  const sortData = (data: ReportData[]) => {
-    return [...data].sort((a, b) => {
-      const valA: number | string = a[sortKey]
-      const valB: number | string = b[sortKey]
+  const sortData = useCallback(
+    (data: ReportData[]) => {
+      return [...data].sort((a, b) => {
+        const valA: number | string = a[sortKey]
+        const valB: number | string = b[sortKey]
 
-      if (sortKey === 'period') {
-        const dateA = parsePeriodToDate(a.period).getTime()
-        const dateB = parsePeriodToDate(b.period).getTime()
-        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
-      }
+        if (sortKey === 'period') {
+          const dateA = parsePeriodToDate(a.period).getTime()
+          const dateB = parsePeriodToDate(b.period).getTime()
+          return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
+        }
 
-      if (typeof valA === 'number' && typeof valB === 'number') {
-        return sortOrder === 'asc' ? valA - valB : valB - valA
-      }
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          return sortOrder === 'asc' ? valA - valB : valB - valA
+        }
 
-      return sortOrder === 'asc'
-        ? String(valA).localeCompare(String(valB))
-        : String(valB).localeCompare(String(valA))
-    })
-  }
+        return sortOrder === 'asc'
+          ? String(valA).localeCompare(String(valB))
+          : String(valB).localeCompare(String(valA))
+      })
+    },
+    [sortKey, sortOrder]
+  )
+
+  const generateReport = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await generateReportAction({ period, startDate, endDate })
+      setReportData(sortData(data))
+    } catch (error) {
+      console.error('Error generating report:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [period, startDate, endDate, sortData])
+
+  useEffect(() => {
+    generateReport()
+  }, [generateReport])
 
   const handleSort = (key: keyof ReportData) => {
     if (sortKey === key) {
@@ -305,7 +308,11 @@ export function ReportsView() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="period">Periode</Label>
-              <Select value={period} onValueChange={v => setPeriod(v as any)} disabled={loading}>
+              <Select
+                value={period}
+                onValueChange={(v: 'daily' | 'weekly' | 'monthly' | 'yearly') => setPeriod(v)}
+                disabled={loading}
+              >
                 <SelectTrigger className="h-10">
                   <SelectValue />
                 </SelectTrigger>

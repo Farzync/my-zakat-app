@@ -99,7 +99,7 @@ export async function createTransaction(formData: FormData) {
     revalidatePath('/dashboard/transactions')
     revalidatePath('/dashboard')
     return { success: true }
-  } catch (err) {
+  } catch {
     return { success: false, error: 'Gagal membuat transaksi' }
   }
 }
@@ -140,7 +140,7 @@ export async function updateTransaction(id: string, formData: FormData) {
     revalidatePath('/dashboard/transactions')
     revalidatePath('/dashboard')
     return { success: true }
-  } catch (err) {
+  } catch {
     return { success: false, error: 'Gagal mengupdate transaksi' }
   }
 }
@@ -154,7 +154,7 @@ export async function deleteTransaction(id: string) {
     revalidatePath('/dashboard/transactions')
     revalidatePath('/dashboard')
     return { success: true }
-  } catch (err) {
+  } catch {
     return { success: false, error: 'Gagal menghapus transaksi' }
   }
 }
@@ -191,7 +191,7 @@ export async function fetchPaginatedTransactions(page: number = 1, limit: number
   try {
     const result = await getPaginatedTransactions(page, limit)
     return { success: true, ...result }
-  } catch (error) {
+  } catch {
     return { success: false, error: 'Gagal mengambil data transaksi' }
   }
 }

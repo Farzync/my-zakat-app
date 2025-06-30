@@ -21,6 +21,7 @@ import { Plus, Minus, Pen } from 'lucide-react'
 import { OnBehalfOfType, type Transaction } from '@/lib/data'
 import toast from 'react-hot-toast'
 import { SignatureDialog } from '@/components/signature-dialog'
+import Image from 'next/image'
 
 interface OnBehalfOfItem {
   type: OnBehalfOfType
@@ -281,10 +282,12 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                   </Button>
                   {donorSignature && (
                     <div className="border rounded-lg p-2">
-                      <img
+                      <Image
                         src={donorSignature}
                         alt="Tanda tangan pemberi zakat"
-                        className="max-h-20 mx-auto"
+                        width={200}
+                        height={80}
+                        className="mx-auto h-auto max-h-20 w-auto object-contain"
                       />
                     </div>
                   )}
@@ -305,10 +308,12 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                   </Button>
                   {recipientSignature && (
                     <div className="border rounded-lg p-2">
-                      <img
+                      <Image
                         src={recipientSignature}
-                        alt="Tanda tangan penerima"
-                        className="max-h-20 mx-auto"
+                        alt="Tanda tangan penerima zakat"
+                        width={200}
+                        height={80}
+                        className="mx-auto h-auto max-h-20 w-auto object-contain"
                       />
                     </div>
                   )}
@@ -323,7 +328,7 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
                 name="notes"
                 placeholder="Catatan tambahan (opsional)"
                 rows={3}
-                defaultValue={transaction?.notes}
+                defaultValue={transaction?.notes !== null ? transaction?.notes : ''}
                 className="w-full"
               />
             </div>

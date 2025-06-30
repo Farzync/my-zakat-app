@@ -572,11 +572,11 @@ export async function getFilteredReportData(
   endDate?: string
 ): Promise<ReportData[]> {
   // Build where clause for date filtering
-  const whereClause: any = {}
+  const whereClause: Record<string, unknown> = {}
   if (startDate || endDate) {
     whereClause.date = {}
-    if (startDate) whereClause.date.gte = new Date(startDate)
-    if (endDate) whereClause.date.lte = new Date(endDate)
+    if (startDate) (whereClause.date as { gte?: Date }).gte = new Date(startDate)
+    if (endDate) (whereClause.date as { lte?: Date }).lte = new Date(endDate)
   }
 
   const transactions = await prisma.transaction.findMany({

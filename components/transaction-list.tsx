@@ -45,6 +45,7 @@ import Link from 'next/link'
 import { Label } from '@/components/ui/label'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Skeleton } from '@/components/ui/skeleton'
+import Image from 'next/image'
 
 export function TransactionList() {
   const searchParams = useSearchParams()
@@ -143,10 +144,6 @@ export function TransactionList() {
     }
 
     return `${baseClasses} ${colors[type] || colors[ZakatType.OTHER]}`
-  }
-
-  const formatOnBehalfOf = (onBehalfOf: Transaction['onBehalfOf']) => {
-    return onBehalfOf.map(item => `${getOnBehalfOfTypeLabel(item.type)}: ${item.name}`).join(', ')
   }
 
   if (loading) {
@@ -356,10 +353,12 @@ export function TransactionList() {
                                 </Label>
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[200px] flex items-center justify-center">
                                   {selectedTransaction.donorSignature ? (
-                                    <img
+                                    <Image
                                       src={selectedTransaction.donorSignature}
-                                      alt="Tanda tangan pemberi"
-                                      className="max-w-full max-h-[180px] object-contain"
+                                      alt="Tanda tangan pemberi zakat"
+                                      width={200}
+                                      height={80}
+                                      className="mx-auto h-auto max-h-20 w-auto object-contain"
                                     />
                                   ) : (
                                     <p className="text-gray-400 text-sm">Tidak ada tanda tangan</p>
@@ -372,10 +371,12 @@ export function TransactionList() {
                                 </Label>
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[200px] flex items-center justify-center">
                                   {selectedTransaction.recipientSignature ? (
-                                    <img
+                                    <Image
                                       src={selectedTransaction.recipientSignature}
-                                      alt="Tanda tangan penerima"
-                                      className="max-w-full max-h-[180px] object-contain"
+                                      alt="Tanda tangan penerima zakat"
+                                      width={200}
+                                      height={80}
+                                      className="mx-auto h-auto max-h-20 w-auto object-contain"
                                     />
                                   ) : (
                                     <p className="text-gray-400 text-sm">Tidak ada tanda tangan</p>

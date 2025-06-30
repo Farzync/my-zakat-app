@@ -2,7 +2,7 @@
   "name": "my-zakat-app",
   "version": "0.1.1",
   "scripts": {
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next lint && next build",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
