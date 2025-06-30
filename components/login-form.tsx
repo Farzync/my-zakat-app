@@ -34,7 +34,7 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Login</CardTitle>
+        <CardTitle className="text-center text-2xl">Login</CardTitle>
       </CardHeader>
       <CardContent>
         <form
@@ -82,14 +82,6 @@ export function LoginForm() {
             {loading ? 'Memproses...' : 'Login'}
           </Button>
         </form>
-
-        <div className="mt-4 text-sm text-gray-600">
-          <p>
-            <strong>Demo Accounts:</strong>
-          </p>
-          <p>Admin: admin / admin123</p>
-          <p>Staff: staff / staff123</p>
-        </div>
       </CardContent>
     </Card>
   )

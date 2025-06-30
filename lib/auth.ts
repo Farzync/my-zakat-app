@@ -3,6 +3,7 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { getUserByCredentials } from '@/lib/user'
+import { prisma } from '@/lib/prisma'
 
 const secretKey = process.env.JWT_SECRET || 'your-secret-key'
 const key = new TextEncoder().encode(secretKey)
@@ -63,6 +64,10 @@ export async function verifySession(): Promise<UserSession | null> {
 
   try {
     const session = await decrypt(cookie)
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    })
+    if (!user) return null
     return session.user
   } catch {
     return null
