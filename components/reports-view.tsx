@@ -266,20 +266,22 @@ export function ReportsView() {
   )
 
   const generateReport = useCallback(async () => {
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      alert('Tanggal akhir tidak boleh lebih awal dari tanggal mulai.')
+      return
+    }
+
     setLoading(true)
     try {
       const data = await generateReportAction({ period, startDate, endDate })
       setReportData(sortData(data))
+      setCurrentPage(1)
     } catch (error) {
       console.error('Error generating report:', error)
     } finally {
       setLoading(false)
     }
   }, [period, startDate, endDate, sortData])
-
-  useEffect(() => {
-    generateReport()
-  }, [generateReport])
 
   const handleSort = (key: keyof ReportData) => {
     if (sortKey === key) {
@@ -290,6 +292,9 @@ export function ReportsView() {
     }
     setReportData(prev => sortData(prev))
   }
+
+  const isInvalidDateRange =
+    startDate !== '' && endDate !== '' && new Date(startDate) > new Date(endDate)
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -347,9 +352,16 @@ export function ReportsView() {
               />
             </div>
             <div className="flex items-end">
-              <Button onClick={generateReport} disabled={loading} className="w-full h-10">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                {loading ? 'Memuat...' : 'Generate'}
+              <Button
+                onClick={generateReport}
+                disabled={loading || isInvalidDateRange}
+                className="w-full h-10"
+              >
+                {isInvalidDateRange
+                  ? 'Tanggal tidak valid'
+                  : loading
+                    ? 'Memuat...'
+                    : 'Cari Laporan'}
               </Button>
             </div>
           </div>
