@@ -47,6 +47,9 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
   const [isRecipientSignatureDialogOpen, setIsRecipientSignatureDialogOpen] = useState(false)
   const router = useRouter()
 
+  const [notes, setNotes] = useState(transaction?.notes || '')
+  const maxNotesLength = 25
+
   const formatCurrency = (value: string) => {
     const number = value.replace(/\D/g, '')
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
@@ -267,16 +270,26 @@ export function TransactionForm({ transaction, isEdit = false }: TransactionForm
             </div>
 
             {/* Notes */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="notes">Catatan</Label>
-              <Textarea
-                id="notes"
-                name="notes"
-                placeholder="Catatan tambahan (opsional)"
-                rows={3}
-                defaultValue={transaction?.notes !== null ? transaction?.notes : ''}
-                className="w-full"
-              />
+              <div className="relative">
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  placeholder="Catatan tambahan (opsional)"
+                  rows={3}
+                  value={notes}
+                  onChange={e => {
+                    if (e.target.value.length <= maxNotesLength) {
+                      setNotes(e.target.value)
+                    }
+                  }}
+                  className="w-full pr-16"
+                />
+                <span className="absolute bottom-1 right-2 text-xs text-muted-foreground">
+                  {notes.length}/{maxNotesLength}
+                </span>
+              </div>
             </div>
 
             {/* Signature Fields */}

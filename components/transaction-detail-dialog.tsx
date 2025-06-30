@@ -20,6 +20,7 @@ import {
 } from '@/lib/data'
 import { formatCurrency } from '@/lib/utils'
 import { Eye } from 'lucide-react'
+import { generateReceiptPDF } from '@/components/transaction-receipt'
 
 type Props = {
   transaction: Transaction
@@ -146,6 +147,11 @@ export function TransactionDetailDialog({ transaction, onOpen }: Props) {
                 )}
               </div>
             </div>
+          </div>
+          <div className="flex justify-end pt-6 border-t">
+            <Button variant="default" onClick={() => generateReceiptPDF(transaction)}>
+              Download Struk
+            </Button>
           </div>
         </div>
       </DialogContent>
