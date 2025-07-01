@@ -15,77 +15,105 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { exportData } from '@/lib/actions'
-import { Download, FileSpreadsheet, FileText } from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
+import { saveAs } from 'file-saver'
+import toast from 'react-hot-toast'
 
 export function ExportForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
-  async function handleExport(formData: FormData) {
+  async function handleExport(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setLoading(true)
     setError('')
-    setSuccess('')
+
+    const formData = new FormData(e.currentTarget)
+
+    const startDate = formData.get('startDate')?.toString()
+    const endDate = formData.get('endDate')?.toString()
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      setError('Tanggal mulai tidak boleh setelah tanggal akhir.')
+      setLoading(false)
+      return
+    }
+
+    // Pastikan zakatTypes terisi minimal satu
+    const zakatTypes = formData.getAll('zakatTypes')
+    if (!zakatTypes || zakatTypes.length === 0) {
+      setError('Pilih minimal satu tipe zakat.')
+      setLoading(false)
+      return
+    }
+
+    // Tambahkan format excel secara otomatis
+    formData.append('formats', 'excel')
 
     const result = await exportData(formData)
 
-    if (result.success) {
-      setSuccess(`Data berhasil diexport! File: ${result.filename}`)
+    if (result.success && result.data) {
+      const byteCharacters = atob(result.data)
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+      }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+
+      saveAs(blob, result.filename)
+      toast.success('Berhasil mengekspor data! File Excel telah diunduh.')
     } else {
-      setError(result.error || 'Gagal mengexport data')
+      setError(result.error || 'Gagal mengekspor data')
     }
 
     setLoading(false)
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 space-y-6">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Export Data Transaksi</CardTitle>
+    <div className="w-full max-w-3xl mx-auto px-4 py-10 space-y-8">
+      <Card className="shadow-lg border-0">
+        <CardHeader className="border-b pb-4">
+          <CardTitle className="text-2xl font-bold tracking-tight">Export Data Transaksi</CardTitle>
         </CardHeader>
-        <CardContent>
-          <form action={handleExport} className="space-y-6">
+        <CardContent className="pt-8 space-y-8">
+          <form onSubmit={handleExport} className="space-y-8">
             {/* Date Range */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Tanggal Mulai</Label>
-                <Input id="startDate" name="startDate" type="date" />
+                <Input id="startDate" name="startDate" type="date" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">Tanggal Akhir</Label>
-                <Input id="endDate" name="endDate" type="date" />
+                <Input id="endDate" name="endDate" type="date" required />
               </div>
             </div>
 
-            {/* Zakat Type Filter */}
+            {/* Zakat Types */}
             <div className="space-y-2">
-              <Label>Tipe Zakat</Label>
+              <Label className="font-medium">Tipe Zakat</Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="fitrah" name="zakatTypes" value="fitrah" defaultChecked />
-                  <Label htmlFor="fitrah">Fitrah</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="mal" name="zakatTypes" value="mal" defaultChecked />
-                  <Label htmlFor="mal">Mal</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="infak" name="zakatTypes" value="infak" defaultChecked />
-                  <Label htmlFor="infak">Infak</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="other" name="zakatTypes" value="other" defaultChecked />
-                  <Label htmlFor="other">Lainnya</Label>
-                </div>
+                {['fitrah', 'mal', 'infak', 'other'].map(type => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <Checkbox id={type} name="zakatTypes" value={type} defaultChecked />
+                    <Label htmlFor={type} className="capitalize">
+                      {type}
+                    </Label>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Payment Method Filter */}
+            {/* Payment Method */}
             <div className="space-y-2">
-              <Label htmlFor="paymentMethod">Metode Pembayaran</Label>
+              <Label htmlFor="paymentMethod" className="font-medium">
+                Metode Pembayaran
+              </Label>
               <Select name="paymentMethod">
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Semua metode pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -98,67 +126,47 @@ export function ExportForm() {
               </Select>
             </div>
 
-            {/* Export Format */}
+            {/* Data Includes */}
             <div className="space-y-2">
-              <Label>Format Export</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="excel" name="formats" value="excel" defaultChecked />
-                  <Label htmlFor="excel" className="flex items-center gap-2">
-                    <FileSpreadsheet className="h-4 w-4" />
-                    Excel (.xlsx)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="pdf" name="formats" value="pdf" defaultChecked />
-                  <Label htmlFor="pdf" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    PDF
-                  </Label>
-                </div>
-              </div>
-            </div>
-
-            {/* Include Options */}
-            <div className="space-y-2">
-              <Label>Data yang Disertakan</Label>
+              <Label className="font-medium">Data yang Disertakan</Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="summary" name="includes" value="summary" defaultChecked />
-                  <Label htmlFor="summary">Ringkasan Total</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="signatures" name="includes" value="signatures" />
-                  <Label htmlFor="signatures">Tanda Tangan</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="notes" name="includes" value="notes" defaultChecked />
-                  <Label htmlFor="notes">Catatan</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="charts" name="includes" value="charts" />
-                  <Label htmlFor="charts">Grafik (PDF only)</Label>
-                </div>
+                {[
+                  { id: 'summary', label: 'Ringkasan Total', defaultChecked: true },
+                  { id: 'signatures', label: 'Tanda Tangan' },
+                  { id: 'notes', label: 'Catatan', defaultChecked: true },
+                ].map(({ id, label, defaultChecked }) => (
+                  <div key={id} className="flex items-center space-x-2">
+                    <Checkbox id={id} name="includes" value={id} defaultChecked={defaultChecked} />
+                    <Label htmlFor={id}>{label}</Label>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Alerts */}
             {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <div className="rounded-md bg-red-600 text-white p-4 text-sm font-medium">
+                {error}
+              </div>
             )}
 
-            {success && (
-              <Alert>
-                <AlertDescription>{success}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Submit Button */}
-            <Button type="submit" disabled={loading} className="w-full">
-              <Download className="h-4 w-4 mr-2" />
-              {loading ? 'Mengexport...' : 'Export Data'}
+            {/* Submit */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 text-base gap-2 font-semibold flex items-center justify-center"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Mengexport...
+                </>
+              ) : (
+                <>
+                  <Download className="h-5 w-5" />
+                  Export Data (Excel)
+                </>
+              )}
             </Button>
           </form>
         </CardContent>
