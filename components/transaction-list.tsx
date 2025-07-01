@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -54,7 +54,7 @@ export function TransactionList() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalEntries, setTotalEntries] = useState(0)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     const data = await fetchPaginatedTransactions(currentPage, entriesPerPage)
     if (data?.success && 'transactions' in data) {
@@ -69,11 +69,11 @@ export function TransactionList() {
       setTotalEntries(0)
     }
     setLoading(false)
-  }
+  }, [currentPage, entriesPerPage])
 
   useEffect(() => {
     fetchData()
-  }, [currentPage, entriesPerPage])
+  }, [fetchData])
 
   useEffect(() => {
     let filtered = transactions
@@ -102,7 +102,9 @@ export function TransactionList() {
     const result = await deleteTransaction(id)
     if (result.success) {
       toast.success('Transaksi berhasil dihapus')
-      setTransactions(transactions.filter(t => t.id !== id))
+      setTransactions(prev => prev.filter(t => t.id !== id))
+    } else {
+      toast.error('Gagal menghapus transaksi')
     }
   }
 

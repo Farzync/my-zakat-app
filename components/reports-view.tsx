@@ -303,7 +303,7 @@ export function ReportsView() {
 
   useEffect(() => {
     generateReport().finally(() => setInitialLoad(false))
-  }, [])
+  }, [generateReport])
 
   return (
     <div className="space-y-6 p-4 sm:p-6">

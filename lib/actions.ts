@@ -15,7 +15,13 @@ import {
   Transaction,
 } from '@/lib/data'
 import ExcelJS from 'exceljs'
-import { prisma } from './prisma'
+import { prisma } from '@/lib/prisma'
+
+interface ColumnDefinition<T = unknown> {
+  header: string
+  key: keyof T | string
+  width?: number
+}
 
 export async function login(formData: FormData) {
   const username = formData.get('username') as string
@@ -200,7 +206,7 @@ export async function exportData(formData: FormData) {
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' }
 
     // Define columns
-    const columns = [
+    const columns: ColumnDefinition[] = [
       { header: 'ID', key: 'id', width: 30 },
       { header: 'Tanggal', key: 'date', width: 15 },
       { header: 'Nama Muzakki', key: 'donorName', width: 20 },
@@ -228,7 +234,7 @@ export async function exportData(formData: FormData) {
         .map(behalf => `${behalf.name} (${behalf.type})`)
         .join(', ')
 
-      const row: any = {
+      const row: Record<string, string | number> = {
         id: transaction.id,
         date: new Date(transaction.date).toLocaleDateString('id-ID', {
           weekday: 'long',
@@ -387,13 +393,14 @@ interface ExportConfig {
 }
 
 async function getFilteredTransactions(config: ExportConfig): Promise<Transaction[]> {
-  const whereClause: any = {}
+  const whereClause: Record<string, unknown> = {}
 
   // Date range filter
   if (config.startDate || config.endDate) {
-    whereClause.date = {}
-    if (config.startDate) whereClause.date.gte = new Date(config.startDate)
-    if (config.endDate) whereClause.date.lte = new Date(config.endDate)
+    whereClause.date = {} as Record<string, Date>
+    if (config.startDate)
+      (whereClause.date as Record<string, Date>).gte = new Date(config.startDate)
+    if (config.endDate) (whereClause.date as Record<string, Date>).lte = new Date(config.endDate)
   }
 
   // Zakat type filter
@@ -431,15 +438,17 @@ async function getFilteredTransactions(config: ExportConfig): Promise<Transactio
     amount: Number(transaction.amount),
     paymentMethod: transaction.paymentMethod as PaymentMethod,
     zakatType: transaction.zakatType as ZakatType,
-    onBehalfOf: transaction.onBehalfOf.map(behalf => ({
-      id: behalf.id,
-      type: behalf.type as any,
-      name: behalf.name,
-    })),
+    onBehalfOf: transaction.onBehalfOf.map(
+      (behalf: { id: string; type: string; name: string }) => ({
+        id: behalf.id,
+        type: behalf.type as OnBehalfOfType,
+        name: behalf.name,
+      })
+    ),
     user: transaction.user
       ? {
           ...transaction.user,
-          role: transaction.user.role as any,
+          role: transaction.user.role as import('@/lib/data').UserRole,
         }
       : undefined,
   }))
