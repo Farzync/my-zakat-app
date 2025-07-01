@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,7 @@ import autoTable from 'jspdf-autotable'
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import { Skeleton } from '@/components/ui/skeleton'
+import toast from 'react-hot-toast'
 
 export function ReportsView() {
   const [reportData, setReportData] = useState<ReportData[]>([])
@@ -32,6 +33,8 @@ export function ReportsView() {
   const [sortKey, setSortKey] = useState<keyof ReportData>('period')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [currentPage, setCurrentPage] = useState(1)
+  const [, setInitialLoad] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const rowsPerPage = 12
 
   const paginatedData = reportData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
@@ -123,6 +126,7 @@ export function ReportsView() {
     doc.text(`Transaksi   : ${totalTx.toLocaleString('id-ID')}`, boxX + 100, boxY + 27)
 
     doc.save('laporan-zakat.pdf')
+    toast.success('Berhasil mengekspor data! File PDF telah diunduh.')
   }
 
   const exportToExcel = async () => {
@@ -220,6 +224,7 @@ export function ReportsView() {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     })
     saveAs(blob, 'laporan-zakat.xlsx')
+    toast.success('Berhasil mengekspor data! File Excel telah diunduh.')
   }
 
   const parsePeriodToDate = (period: string): Date => {
@@ -296,6 +301,10 @@ export function ReportsView() {
   const isInvalidDateRange =
     startDate !== '' && endDate !== '' && new Date(startDate) > new Date(endDate)
 
+  useEffect(() => {
+    generateReport().finally(() => setInitialLoad(false))
+  }, [])
+
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <div className="lg:hidden">
@@ -316,7 +325,7 @@ export function ReportsView() {
               <Select
                 value={period}
                 onValueChange={(v: 'daily' | 'weekly' | 'monthly' | 'yearly') => setPeriod(v)}
-                disabled={loading}
+                disabled={loading || exporting}
               >
                 <SelectTrigger className="h-10">
                   <SelectValue />
@@ -337,7 +346,7 @@ export function ReportsView() {
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
                 className="h-10"
-                disabled={loading}
+                disabled={loading || exporting}
               />
             </div>
             <div>
@@ -348,13 +357,13 @@ export function ReportsView() {
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
                 className="h-10"
-                disabled={loading}
+                disabled={loading || exporting}
               />
             </div>
             <div className="flex items-end">
               <Button
                 onClick={generateReport}
-                disabled={loading || isInvalidDateRange}
+                disabled={loading || isInvalidDateRange || exporting}
                 className="w-full h-10"
               >
                 {isInvalidDateRange
@@ -410,13 +419,42 @@ export function ReportsView() {
       <Card>
         <CardHeader>
           <CardTitle className="mb-2 text-center">Laporan Detail</CardTitle>
-          <Button variant="outline" onClick={exportToPDF} disabled={loading}>
-            <FileDown className="w-4 h-4 mr-2" />
-            PDF
+          <Button
+            variant="outline"
+            onClick={async () => {
+              setExporting(true)
+              await exportToPDF()
+              setExporting(false)
+            }}
+            disabled={loading || exporting}
+          >
+            {exporting ? (
+              'Mengekspor...'
+            ) : (
+              <>
+                <FileDown className="w-4 h-4 mr-2" />
+                PDF
+              </>
+            )}
           </Button>
-          <Button variant="outline" onClick={exportToExcel} disabled={loading}>
-            <FileText className="w-4 h-4 mr-2" />
-            Excel
+
+          <Button
+            variant="outline"
+            onClick={async () => {
+              setExporting(true)
+              await exportToExcel()
+              setExporting(false)
+            }}
+            disabled={loading || exporting}
+          >
+            {exporting ? (
+              'Mengekspor...'
+            ) : (
+              <>
+                <FileText className="w-4 h-4 mr-2" />
+                Excel
+              </>
+            )}
           </Button>
         </CardHeader>
         <CardContent className="overflow-x-auto">

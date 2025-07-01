@@ -190,6 +190,15 @@ export async function exportData(formData: FormData) {
     // Transaction sheet
     const transactionSheet = workbook.addWorksheet('Transactions')
 
+    const headerRow = transactionSheet.getRow(1)
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } }
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1E293B' }, // slate-800
+    }
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' }
+
     // Define columns
     const columns = [
       { header: 'ID', key: 'id', width: 30 },
@@ -221,7 +230,12 @@ export async function exportData(formData: FormData) {
 
       const row: any = {
         id: transaction.id,
-        date: transaction.date.toLocaleDateString('id-ID'),
+        date: new Date(transaction.date).toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }),
         donorName: transaction.donorName,
         recipientName: transaction.recipientName,
         onBehalfOf: onBehalfOfNames,
@@ -235,11 +249,31 @@ export async function exportData(formData: FormData) {
       }
 
       if (exportConfig.includes.includes('signatures')) {
-        row.donorSignature = transaction.donorSignature || ''
-        row.recipientSignature = transaction.recipientSignature || ''
+        row.donorSignature = transaction.donorSignature ? 'Tersedia' : 'Tidak Ada'
+        row.recipientSignature = transaction.recipientSignature ? 'Tersedia' : 'Tidak Ada'
       }
 
       transactionSheet.addRow(row)
+
+      const lastRow = transactionSheet.lastRow
+      // Style semua kolom secara global
+      transactionSheet.columns.forEach(col => {
+        col.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true }
+      })
+
+      // Freeze header
+      transactionSheet.views = [{ state: 'frozen', ySplit: 1 }]
+
+      if (lastRow) {
+        const amountCell = lastRow.getCell('amount')
+        amountCell.numFmt = '"Rp"#.##0'
+        amountCell.alignment = { horizontal: 'right' }
+      }
+    })
+
+    transactionSheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return // skip header
+      row.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true }
     })
 
     // Style transaction sheet
@@ -290,6 +324,11 @@ export async function exportData(formData: FormData) {
         { category: 'Total', amount: summary.total },
         { category: 'Jumlah Transaksi', amount: summary.transactionCount },
       ])
+      for (let i = 2; i <= 6; i++) {
+        const amountCell = summarySheet.getCell(`B${i}`)
+        amountCell.numFmt = '"Rp"#.##0'
+        amountCell.alignment = { horizontal: 'right' }
+      }
 
       // Style summary sheet
       summarySheet.getRow(1).font = { bold: true }

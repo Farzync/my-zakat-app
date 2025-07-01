@@ -39,6 +39,13 @@ export function ExportForm() {
       return
     }
 
+    const today = new Date()
+    if (endDate && new Date(endDate) > today) {
+      setError('Tanggal akhir tidak boleh lebih dari hari ini.')
+      setLoading(false)
+      return
+    }
+
     // Pastikan zakatTypes terisi minimal satu
     const zakatTypes = formData.getAll('zakatTypes')
     if (!zakatTypes || zakatTypes.length === 0) {
@@ -84,11 +91,23 @@ export function ExportForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Tanggal Mulai</Label>
-                <Input id="startDate" name="startDate" type="date" required />
+                <Input
+                  id="startDate"
+                  name="startDate"
+                  type="date"
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">Tanggal Akhir</Label>
-                <Input id="endDate" name="endDate" type="date" required />
+                <Input
+                  id="endDate"
+                  name="endDate"
+                  type="date"
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                />
               </div>
             </div>
 
